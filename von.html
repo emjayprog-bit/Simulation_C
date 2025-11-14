@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Von Neumann Architecture Simulation</title>
+  <link rel="stylesheet" href="von.css" />
+</head>
+<body>
+  <header class="top-header">
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <h1 class="title">Von Neumann Architecture</h1>
+
+    <div class="header-right">
+      <button id="playHeaderBtn" class="control-btn" title="Play/Pause">Play</button>
+      <button id="stopHeaderBtn" class="control-btn" title="Stop">Stop</button>
+      <button id="infoBtn" class="icon-btn" title="Info">ℹ️</button>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <section class="top-row">
+      <!-- CPU card -->
+      <article class="card cpu-card" id="cpuCard">
+        <h2>Central Processing Unit (CPU)</h2>
+
+        <div class="registers">
+          <!-- R1, R2, R3 in one horizontal row -->
+          <div class="gen-regs-row">
+            <div class="reg-row">
+              <label>R1</label><input id="r1" value="0" readonly>
+            </div>
+            <div class="reg-row">
+              <label>R2</label><input id="r2" value="0" readonly>
+            </div>
+            <div class="reg-row">
+              <label>R3</label><input id="r3" value="0" readonly>
+            </div>
+          </div>
+
+          <!-- Other registers -->
+          <div class="reg-row">
+            <label>PC</label><input id="pc" value="0001" readonly>
+          </div>
+          <div class="reg-row">
+            <label>IR</label><input id="ir" value="" readonly>
+          </div>
+          <div class="reg-row">
+            <label>MAR</label><input id="mar" value="" readonly>
+          </div>
+          <div class="reg-row">
+            <label>MDR</label><input id="mdr" value="" readonly>
+          </div>
+          <div class="reg-row">
+            <label>ACC</label><input id="acc" value="" readonly>
+          </div>
+        </div>
+
+        <div class="unit-columns">
+          <div class="unit control-unit">
+            <h3>Control Unit</h3>
+            <div id="controlUnitLog" class="unit-log">Waiting for instruction...</div>
+          </div>
+          <div class="unit alu-unit">
+            <h3>ALU</h3>
+            <div id="aluLog" class="unit-log">Ready...</div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Buses (center column) -->
+      <div class="buses-column">
+        <div class="bus-row address-bus">
+          <div class="bus-label">Address Bus</div>
+          <div id="addrLine" class="bus-line" aria-hidden="true"></div>
+        </div>
+
+        <div class="bus-row control-bus">
+          <div class="bus-label">Control Bus</div>
+          <div id="ctrlLine" class="bus-line" aria-hidden="true"></div>
+        </div>
+
+        <div class="bus-row data-bus">
+          <div class="bus-label">Data Bus</div>
+          <div id="dataLine" class="bus-line" aria-hidden="true"></div>
+        </div>
+      </div>
+
+      <!-- Memory unit + inputs + task record (right side) -->
+      <div class="memory-and-inputs">
+        <article class="card memory-card" id="memoryCard">
+          <div class="memory-header">
+            <h2>Memory Unit</h2>
+            <div>
+              <button id="resetMemoryBtn" class="small-btn">Reset</button>
+            </div>
+          </div>
+
+          <table class="memory-table" aria-live="polite">
+            <thead><tr><th style="width:110px">Address</th><th>Instruction / Data</th><th style="width:100px">Action</th></tr></thead>
+            <tbody id="memoryBody"></tbody>
+          </table>
+        </article>
+
+        <div class="right-column">
+          <div class="input-stack">
+            <div class="instruction-panel card" id="instructionPanel">
+              <div class="panel-head">
+                <h3>Instruction Input</h3>
+                <button id="helpBtn" class="small-icon" title="Help">?</button>
+              </div>
+              <textarea id="instructionInput" placeholder="One instruction per line. Examples:MOV R1, #5   ADD R3, R1, R2"></textarea>
+              <div class="input-actions">
+                <button id="loadInstructionBtn" class="btn">Load</button>
+                <button id="clearInstructionBtn" class="btn ghost">Clear</button>
+              </div>
+            </div>
+
+            <div class="direct-panel card">
+              <h3>Direct Memory Input</h3>
+              <input id="dataValueInput" placeholder="Data value (numeric)">
+              <div class="input-actions">
+                <button id="setDataBtn" class="btn">Set</button>
+                <button id="clearDataBtn" class="btn ghost">Clear</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="task-record card">
+            <div class="task-record-header">
+              <h3>Task Record</h3>
+              <button id="clearLogsBtn" class="btn ghost">Clear Logs</button>
+            </div>
+            <div id="taskRecord" class="task-record-box"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Info modal (small popup at top-right) -->
+    <div id="infoModal" aria-hidden="true">
+      <button class="modal-close" id="infoClose">✖</button>
+      <h3>Von Neumann Architecture</h3>
+      <p>
+        The Von Neumann architecture is a computer design model that uses a single memory for both
+        program instructions and data. The CPU performs the instruction cycle: Fetch → Decode → Execute.
+      </p>
+    </div>
+
+    <!-- Help modal (small popup at top-right, like info) -->
+    <div id="helpModal" aria-hidden="true">
+      <button class="modal-close" id="helpClose">✖</button>
+      <h3>Instruction Examples</h3>
+      <div class="help-content">
+        <p><b>Arithmetic</b>: <code>ADD R1, R2, R3</code> — adds R2 + R3 → R1</p>
+        <p><b>SUB</b>: <code>SUB R1, R2, R3</code> — subtracts R3 from R2 → R1</p>
+        <p><b>MUL</b>: <code>MUL R1, R2, R3</code> — multiplies R2 × R3 → R1</p>
+        <p><b>DIV</b>: <code>DIV R1, R2, R3</code> — divides R2 ÷ R3 → R1</p>
+        <p><b>Data Transfer</b>: <code>MOV R1, #5</code> — move literal 5 into R1</p>
+        <p><b>LOAD</b>: <code>LOAD R1, 1000</code> — load memory[1000] → R1</p>
+        <p><b>STORE</b>: <code>STORE R1, 1001</code> — store R1 → memory[1001]</p>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="von.js"></script>
+</body>
+</html>

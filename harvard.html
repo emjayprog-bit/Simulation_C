@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Harvard Architecture Simulation</title>
+  <link rel="stylesheet" href="harvard.css" />
+  <style>
+    /* Extended styles for harvard simulation */
+    .page-wrap { max-width: 100%; margin: 0 auto; padding: 0 40px; }
+    .top-header { display: flex; align-items: center; justify-content: center; gap: 10px; padding: 8px 12px; background: rgba(6,12,20,0.6); border-radius: 8px; margin-bottom: 14px; position: relative; }
+    .back-btn { position: absolute; left: 12px; background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.4); padding: 8px 12px; border-radius: 8px; color: #38bdf8; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .back-btn:hover { background: linear-gradient(90deg, rgba(56,189,248,0.25), rgba(56,189,248,0.1)); border-color: rgba(56,189,248,0.7); box-shadow: 0 0 12px rgba(56,189,248,0.2); }
+    .title { margin: 0; font-size: 1.05rem; color: #38bdf8; }
+    .header-right { position: absolute; right: 12px; display: flex; gap: 8px; align-items: center; }
+    .icon-btn { background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.4); padding: 8px 10px; border-radius: 8px; color: #38bdf8; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .icon-btn:hover { background: linear-gradient(90deg, rgba(56,189,248,0.25), rgba(56,189,248,0.1)); border-color: rgba(56,189,248,0.7); box-shadow: 0 0 12px rgba(56,189,248,0.2); }
+    .control-btn { background: linear-gradient(90deg, #0b2b44, #003b66); color: white; padding: 6px 10px; border-radius: 8px; border: none; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .control-btn:hover { background: linear-gradient(90deg, #0d3a57, #004d7a); box-shadow: 0 0 12px rgba(56,189,248,0.15); }
+
+    /* Layout structure */
+    .simulation-wrapper { display: flex; gap: 20px; align-items: flex-start; justify-content: center; width: 100%; margin-bottom: 20px; }
+    
+    /* Instruction input on left */
+    .left-column { display: flex; flex-direction: column; gap: 12px; width: 360px; }
+    
+    /* CPU in center */
+    .center-column { display: flex; flex-direction: column; gap: 12px; align-items: center; }
+    
+    /* Memory on right */
+    .right-column { display: flex; flex-direction: column; gap: 12px; width: 420px; }
+
+    /* Bus styles */
+    .buses-row { display: flex; gap: 12px; align-items: center; justify-content: center; margin: 12px 0; height: 40px; }
+    .bus-segment { display: flex; align-items: center; gap: 8px; }
+    .bus-line-h { height: 3px; width: 60px; border-radius: 2px; background: rgba(56,189,248,0.5); transition: all 0.3s ease; }
+    .bus-line-h.active { background: #38bdf8; box-shadow: 0 0 8px rgba(56,189,248,0.6); }
+    .bus-label { font-size: 0.75rem; color: #94a3b8; font-weight: 600; min-width: 50px; text-align: center; }
+    
+    /* Colored bus lines */
+    .addr-bus-line { background: #fef08a; height: 2px; width: 80px; transition: all 0.3s ease; }
+    .addr-bus-line.glow { background: #fef08a; box-shadow: 0 0 12px #fef08a; }
+    .data-bus-line { background: #ef4444; height: 2px; width: 80px; transition: all 0.3s ease; }
+    .data-bus-line.glow { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
+    
+    /* Side-by-side buses */
+    .buses-row-duo { display: flex; gap: 20px; align-items: center; justify-content: center; margin: 12px 0; }
+    .bus-segment-duo { display: flex; align-items: center; gap: 8px; }
+    .bus-label-duo { font-size: 0.75rem; color: #94a3b8; font-weight: 600; min-width: 60px; text-align: center; }
+    
+    /* Card styles */
+    .card { background: #1e293b; border-radius: 10px; padding: 12px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 10px 30px rgba(0,0,0,0.6); }
+    
+    /* CPU Card */
+    .cpu-card { border: 2px solid rgba(56,189,248,0.06); padding: 14px; width: 100%; }
+    .cpu-card h2 { color: #38bdf8; margin: 0 0 8px; font-size: 1rem; }
+    
+    .registers { display: flex; flex-direction: column; gap: 6px; margin-bottom: 8px; }
+    .gen-regs-row { display: flex; gap: 12px; margin-bottom: 8px; }
+    .gen-regs-row .reg-row { flex: 1 1 90px; display: flex; align-items: center; gap: 8px; min-width: 72px; }
+    .gen-regs-row .reg-row label { width: 35px; color: #94a3b8; font-weight: 700; min-width: 35px; }
+    .gen-regs-row .reg-row input { flex: 1; padding: 6px 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.04); background: rgba(2,8,14,0.6); color: #38bdf8; font-weight: 700; text-align: center; min-width: 72px; }
+    
+    .reg-row { display: flex; align-items: center; gap: 10px; }
+    .reg-row label { width: 60px; color: #94a3b8; font-weight: 700; }
+    .reg-row input { flex: 1; padding: 6px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); background: rgba(2,8,14,0.6); color: #38bdf8; font-weight: 700; text-align: center; }
+    
+    .unit-columns { display: flex; gap: 8px; margin-top: 10px; }
+    .unit { flex: 1; padding: 8px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); background: rgba(2,8,14,0.5); }
+    .unit h3 { margin: 0; color: #38bdf8; font-size: 0.95rem; }
+    .unit-log { margin-top: 8px; color: #94a3b8; font-weight: 700; font-size: 0.85rem; min-height: 30px; }
+
+    /* Table styles */
+    .instruction-table, .memory-table { width: 100%; border-collapse: collapse; margin-top: 8px; border-radius: 6px; overflow: hidden; }
+    .instruction-table thead { background: linear-gradient(180deg, #38bdf8, #06b6d4); }
+    .memory-table thead { background: linear-gradient(180deg, #4ade80, #22c55e); }
+    
+    .instruction-table th { color: #021826; padding: 8px; text-align: left; font-weight: 700; }
+    .memory-table th { color: #0a1f0a; padding: 8px; text-align: left; font-weight: 700; }
+    
+    .instruction-table td { padding: 8px; border-bottom: 1px solid rgba(56,189,248,0.2); color: #a8d5ff; background: rgba(56,189,248,0.02); }
+    .memory-table td { padding: 8px; border-bottom: 1px solid rgba(74,222,128,0.2); color: #86efac; background: rgba(74,222,128,0.02); }
+    
+    /* Action column */
+    .instruction-table th:last-child { width: 80px; text-align: center; }
+    .memory-table th:last-child { width: 80px; text-align: center; }
+    .instruction-table td:last-child { text-align: center; padding: 4px; }
+    .memory-table td:last-child { text-align: center; padding: 4px; }
+
+    /* Table wrapper for scrolling */
+    .table-wrapper { flex: 1; overflow-y: auto; min-height: 200px; display: flex; flex-direction: column; }
+    .table-wrapper table { flex: 0 0 auto; }
+    .table-wrapper tbody { overflow-y: auto; display: block; width: 100%; }
+    .table-wrapper thead { display: block; width: 100%; }
+    .table-wrapper tr { display: table; width: 100%; table-layout: fixed; }
+    .table-wrapper thead tr { display: table; width: 100%; table-layout: fixed; }
+
+    /* Input sections */
+    .instruction-panel, .memory-card-panel { border: 2px solid; padding: 10px; display: flex; flex-direction: column; height: 450px; }
+    .instruction-panel { border-color: rgba(56,189,248,0.06); }
+    .memory-card-panel { border-color: rgba(74,222,128,0.06); }
+    
+    .instruction-input-panel, .direct-memory-panel { border: 2px solid rgba(56,189,248,0.06); padding: 10px; display: flex; flex-direction: column; gap: 8px; margin-top: 0; }
+    .direct-memory-panel { border-color: rgba(74,222,128,0.06); }
+    .direct-memory-panel h3 { margin: 0 0 4px; color: #4ade80; font-size: 0.95rem; }
+    
+    .panel-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .panel-head h3 { margin: 0; color: #38bdf8; font-size: 0.95rem; }
+    .memory-card-panel .panel-head h3 { color: #4ade80; }
+    
+    .small-icon { background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.4); padding: 6px 8px; border-radius: 6px; color: #38bdf8; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .small-icon:hover { background: linear-gradient(90deg, rgba(56,189,248,0.25), rgba(56,189,248,0.1)); border-color: rgba(56,189,248,0.7); box-shadow: 0 0 10px rgba(56,189,248,0.15); }
+    
+    .small-btn { background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05)); color: #38bdf8; border: 1px solid rgba(56,189,248,0.4); padding: 6px 8px; border-radius: 6px; cursor: pointer; font-weight: 600; transition: all 0.2s ease; }
+    .small-btn:hover { background: linear-gradient(90deg, rgba(56,189,248,0.25), rgba(56,189,248,0.1)); border-color: rgba(56,189,248,0.7); box-shadow: 0 0 10px rgba(56,189,248,0.15); }
+    
+    .btn { padding: 8px 10px; border-radius: 8px; border: none; background: linear-gradient(90deg, #0b2b44, #003b66); color: white; cursor: pointer; transition: all 0.2s ease; }
+    .btn:hover { background: linear-gradient(90deg, #0d3a57, #004d7a); box-shadow: 0 0 12px rgba(56,189,248,0.15); }
+    .btn.ghost { background: linear-gradient(90deg, rgba(56,189,248,0.15), rgba(56,189,248,0.05)); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; }
+    .btn.ghost:hover { background: linear-gradient(90deg, rgba(56,189,248,0.25), rgba(56,189,248,0.1)); border-color: rgba(56,189,248,0.7); }
+    
+    textarea, input { width: 100%; padding: 8px; border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); background: rgba(2,8,14,0.6); color: #38bdf8; }
+    
+    .table-wrapper { flex: 1; overflow-y: auto; }
+    .input-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
+    
+    .task-record { width: 100%; height: 250px; overflow: hidden; padding: 0; background: rgba(2,8,14,0.5); border-radius: 8px; border: 1px solid rgba(255,255,255,0.02); position: relative; display: flex; flex-direction: column; }
+    .task-record-header { display: flex; justify-content: space-between; align-items: center; padding: 10px; background: rgba(2,8,14,0.5); border-bottom: 1px solid rgba(255,255,255,0.02); flex-shrink: 0; position: sticky; top: 0; z-index: 5; }
+    .task-record-header h3 { margin: 0; color: #38bdf8; font-size: 0.95rem; font-weight: 600; }
+    .task-record-box { overflow-y: auto; padding: 10px; flex: 1; display: flex; flex-direction: column; min-height: 200px; }
+    .task-record-box { display: flex; flex-direction: column-reverse; }
+
+    .task-group { margin-bottom: 12px; padding: 8px; border-radius: 6px; background: rgba(56,189,248,0.03); border: 1px solid rgba(56,189,248,0.03); }
+    .task-group h4 { margin: 0 0 6px; color: #38bdf8; font-size: 0.85rem; }
+    .task-line { font-family: monospace; color: #e6f0f6; margin: 3px 0; font-size: 0.8rem; }
+
+    /* Modal */
+    #infoModal { position: fixed; top: 80px; right: 20px; width: 300px; max-width: 85vw; background: #021826; padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(56,189,248,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.8); z-index: 310; max-height: 65vh; overflow-y: auto; display: none; }
+    #infoModal[aria-hidden="false"] { display: block; }
+    #infoModal h3 { margin: 0 0 8px; color: #38bdf8; font-size: 0.95rem; font-weight: 600; }
+    #infoModal p { margin: 0; color: #a8bcc4; font-size: 0.82rem; line-height: 1.5; }
+    #infoModal .modal-close { position: absolute; right: 8px; top: 6px; background: transparent; border: none; color: rgba(56,189,248,0.7); font-size: 16px; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; }
+    #infoModal .modal-close:hover { color: #38bdf8; transform: scale(1.2); transition: all 0.2s ease; }
+  </style>
+</head>
+<body>
+  <header class="top-header">
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back</button>
+    <h1 class="title">Harvard Architecture Simulation</h1>
+    <div class="header-right">
+      <button id="playHeaderBtn" class="control-btn" title="Play">Play</button>
+      <button id="stopHeaderBtn" class="control-btn" title="Stop">Stop</button>
+      <button id="infoBtn" class="icon-btn" title="Info">ℹ️</button>
+    </div>
+  </header>
+
+  <main class="page-wrap">
+    <!-- Three-column layout: Instruction Input | CPU + Buses | Memory Unit -->
+    <div class="simulation-wrapper">
+      <!-- LEFT: Instruction Memory + Input -->
+      <div class="left-column">
+        <div class="card instruction-panel">
+          <div class="panel-head">
+            <h3>Instruction Memory</h3>
+            <button id="helpBtn" class="small-icon" title="Help">?</button>
+          </div>
+          <div class="table-wrapper">
+            <table class="instruction-table">
+              <thead>
+                  <tr><th>Address</th><th>Instruction</th><th>Action</th></tr>
+              </thead>
+              <tbody id="instrMemoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Instruction Input Panel (from von.html) -->
+        <div class="card instruction-input-panel" id="instructionPanel">
+          <div class="panel-head">
+            <h3>Instruction Input</h3>
+          </div>
+          <textarea id="instructionInput" placeholder="One instruction per line. Examples:MOV R1, #5   ADD R3, R1, R2"></textarea>
+          <div class="input-actions">
+            <button id="loadInstructionBtn" class="btn">Load</button>
+            <button id="clearInstructionBtn" class="btn ghost">Clear</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- CENTER: Buses + CPU + Task Record -->
+      <div class="center-column">
+          <!-- Side-by-side Address and Data Buses -->
+          <!-- Side-by-side Address and Data Buses -->
+          <div class="buses-row-duo">
+            <div class="bus-segment-duo">
+              <span class="bus-label-duo">Address Bus</span>
+              <div id="addrLine" class="addr-bus-line"></div>
+            </div>
+            <div class="bus-segment-duo">
+              <span class="bus-label-duo">Data Bus</span>
+              <div id="dataLine" class="data-bus-line"></div>
+            </div>
+          </div>
+
+          <!-- CPU Card -->
+          <article class="card cpu-card" id="cpuCard">
+          <h2>Central Processing Unit (CPU)</h2>
+          <div class="registers">
+            <div class="gen-regs-row">
+              <div class="reg-row">
+                <label>R1</label><input id="r1" value="0" readonly>
+              </div>
+              <div class="reg-row">
+                <label>R2</label><input id="r2" value="0" readonly>
+              </div>
+              <div class="reg-row">
+                <label>R3</label><input id="r3" value="0" readonly>
+              </div>
+            </div>
+            <div class="reg-row">
+              <label>PC</label><input id="pc" value="0001" readonly>
+            </div>
+            <div class="reg-row">
+              <label>IR</label><input id="ir" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>MAR</label><input id="mar" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>MDR</label><input id="mdr" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>ACC</label><input id="acc" value="" readonly>
+            </div>
+          </div>
+          <div class="unit-columns">
+            <div class="unit control-unit">
+              <h3>Control Unit</h3>
+              <div id="controlUnitLog" class="unit-log">Waiting for instruction...</div>
+            </div>
+            <div class="unit alu-unit">
+              <h3>ALU</h3>
+              <div id="aluLog" class="unit-log">Ready...</div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Task Record -->
+        <div class="card task-record">
+          <div class="task-record-header">
+            <h3>Task Record</h3>
+            <button id="clearLogsBtn" class="btn ghost">Clear Logs</button>
+          </div>
+          <div id="taskRecord" class="task-record-box"></div>
+        </div>
+      </div>
+
+      <!-- RIGHT: Data Memory + Input -->
+      <div class="right-column">
+        <div class="card memory-card-panel">
+          <div class="panel-head">
+            <h3>Data Memory</h3>
+          </div>
+          <div class="table-wrapper">
+            <table class="memory-table" aria-live="polite">
+                <thead><tr><th>Address</th><th>Data</th><th>Action</th></tr></thead>
+              <tbody id="memoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Direct Memory Input Panel (from von.html) -->
+        <div class="card direct-memory-panel">
+          <h3>Direct Memory Input</h3>
+          <input id="dataValueInput" placeholder="Data value (numeric)">
+          <div class="input-actions">
+            <button id="setDataBtn" class="btn">Set</button>
+            <button id="clearDataBtn" class="btn ghost">Clear</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Info Modal -->
+  <div id="infoModal" aria-hidden="true">
+    <button class="modal-close" id="infoClose">✖</button>
+    <h3>Harvard Architecture</h3>
+    <p>
+      Harvard architecture uses separate instruction and data memories with independent buses, enabling parallel access for improved performance.
+    </p>
+  </div>
+
+  <!-- Help Modal -->
+  <div id="helpModal" aria-hidden="true" class="modal-help">
+    <button class="modal-close" id="helpClose">✖</button>
+    <h3>Instruction Examples</h3>
+    <div class="help-content">
+      <p><b>MOV</b>: <code>MOV R1, #5</code> — move 5 into R1</p>
+      <p><b>ADD</b>: <code>ADD R1, R2, R3</code> — adds R2 + R3 → R1</p>
+      <p><b>LOAD</b>: <code>LOAD R1, 1000</code> — load memory[1000] → R1</p>
+      <p><b>STORE</b>: <code>STORE R1, 1001</code> — store R1 → memory[1001]</p>
+    </div>
+  </div>
+
+  <script src="harvard.js"></script>
+</body>
+</html>

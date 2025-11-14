@@ -1,0 +1,302 @@
+:root{
+  /* palette aligned with von.css */
+  --bg:#0f172a;
+  --soft-blue:#38bdf8; /* main cyan */
+  --soft-blue-rgb:56,189,248;
+  --muted:#94a3b8;
+  --mem-lime:#4ade80; /* green accent */
+  --mem-lime-rgb:74,222,128;
+  --card-bg: #1e293b;
+  /* Harvard-specific colors */
+  --instr-blue:#38bdf8;
+  --instr-blue-rgb:56,189,248;
+  --data-green:#4ade80;
+  --data-green-rgb:74,222,128;
+}
+
+/* Base */
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  background: linear-gradient(180deg,#02121a,#05182a);
+  color:#e6f0f6;
+  padding:12px;
+}
+
+/* Header */
+header{
+  display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px;background:rgba(6,12,20,0.6);
+  border-radius:8px;margin-bottom:14px;position:relative;
+}
+.back-btn{background:linear-gradient(90deg,rgba(56,189,248,0.15),rgba(56,189,248,0.05));border:1px solid rgba(var(--soft-blue-rgb),0.4);padding:8px 12px;border-radius:8px;color:var(--soft-blue);cursor:pointer;font-weight:600;transition:all 0.2s ease}
+.back-btn:hover{background:linear-gradient(90deg,rgba(56,189,248,0.25),rgba(56,189,248,0.1));border-color:rgba(var(--soft-blue-rgb),0.7);box-shadow:0 0 12px rgba(var(--soft-blue-rgb),0.2)}
+header h1{margin:0;font-size:1.3rem;color:var(--soft-blue);flex:1;text-align:center}
+
+.info-container{position:relative}
+.info-btn{background:linear-gradient(90deg,rgba(56,189,248,0.15),rgba(56,189,248,0.05));border:1px solid rgba(var(--soft-blue-rgb),0.4);padding:8px 12px;border-radius:8px;color:var(--soft-blue);cursor:pointer;font-weight:600;transition:all 0.2s ease;display:flex;align-items:center;gap:6px}
+.info-btn:hover{background:linear-gradient(90deg,rgba(56,189,248,0.25),rgba(56,189,248,0.1));border-color:rgba(var(--soft-blue-rgb),0.7);box-shadow:0 0 12px rgba(var(--soft-blue-rgb),0.2)}
+.info-icon{font-size:1.1rem}
+
+.info-dropdown{
+  position:fixed;
+  top:80px;
+  right:20px;
+  width:320px;
+  max-width:85vw;
+  background:#021826;
+  padding:14px;
+  border-radius:8px;
+  border:1px solid rgba(var(--soft-blue-rgb),0.2);
+  box-shadow:0 8px 32px rgba(0,0,0,0.8);
+  z-index:310;
+  max-height:65vh;
+  overflow-y:auto;
+  display:none;
+}
+
+.info-dropdown.show{display:block}
+
+.info-dropdown h2{margin:0 0 8px;color:var(--soft-blue);font-size:1rem;font-weight:600}
+.info-dropdown h3{margin:8px 0 4px;color:var(--soft-blue);font-size:0.9rem;font-weight:600}
+.info-dropdown p{margin:0 0 8px;color:#a8bcc4;font-size:0.85rem;line-height:1.5}
+.info-dropdown ul{margin:0;padding-left:16px;color:#a8bcc4;font-size:0.85rem}
+.info-dropdown li{margin:4px 0}
+
+/* Main layout */
+.main-container{max-width:100%;margin:0 auto;padding:0 40px}
+
+/* Architecture section */
+.architecture{margin-bottom:20px}
+.architecture h2{color:var(--soft-blue);margin-bottom:12px}
+
+.architecture-row{display:flex;gap:20px;align-items:flex-start;justify-content:center;width:100%;flex-wrap:wrap}
+
+/* Card base */
+.card{background:var(--card-bg);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.03);box-shadow:0 10px 30px rgba(0,0,0,0.6)}
+
+/* CPU Card - Harvard */
+.card.cpu{
+  border:2px solid rgba(var(--soft-blue-rgb),0.06);
+  padding:14px;
+  min-width:300px;
+  flex:0 1 auto;
+}
+.card.cpu h3{color:var(--soft-blue);margin:0 0 6px;font-size:1rem}
+.card.cpu > p{color:var(--muted);font-size:0.9rem;margin:0 0 10px}
+
+.cpu-content{display:flex;gap:12px}
+.registers{flex:1}
+.registers h4{margin:0 0 8px;color:var(--soft-blue);font-size:0.9rem}
+.registers p{margin:4px 0;display:flex;align-items:center;gap:8px}
+.registers label{width:40px;color:var(--muted);font-weight:600}
+.registers input{flex:1;min-width:80px;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:rgba(2,8,14,0.6);color:var(--soft-blue);font-weight:700;text-align:center}
+
+.alu{flex:1}
+.alu h4{margin:0 0 8px;color:var(--soft-blue);font-size:0.9rem}
+.alu input{width:100%;padding:6px 8px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:rgba(2,8,14,0.6);color:var(--soft-blue);font-weight:700;text-align:center}
+
+/* Memory Section */
+.memory-section{display:flex;gap:16px;flex:1;min-width:300px}
+
+.card.memory{
+  border:2px solid;
+  padding:12px;
+  flex:1;
+  min-width:200px;
+  display:flex;
+  flex-direction:column;
+}
+
+.card.memory.instruction-memory{
+  border-color:rgba(var(--instr-blue-rgb),0.2);
+}
+
+.card.memory.data-memory{
+  border-color:rgba(var(--data-green-rgb),0.2);
+}
+
+.memory-title{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.memory-title .icon{font-size:1.3rem}
+.memory-title h3{margin:0;font-size:0.95rem;font-weight:600}
+
+.instruction-memory .memory-title h3{color:var(--instr-blue)}
+.data-memory .memory-title h3{color:var(--data-green)}
+
+.card.memory > p{color:var(--muted);font-size:0.85rem;margin:0 0 8px}
+
+.memory-list{flex:1;overflow-y:auto;max-height:300px}
+
+.memory-entry{
+  display:flex;
+  gap:8px;
+  padding:8px;
+  margin:4px 0;
+  border-radius:6px;
+  background:rgba(255,255,255,0.02);
+  font-size:0.85rem;
+  border-left:3px solid transparent;
+}
+
+.instruction-memory .memory-entry{
+  border-left-color:var(--instr-blue);
+}
+
+.data-memory .memory-entry{
+  border-left-color:var(--data-green);
+}
+
+.memory-entry.highlight{
+  background:rgba(255,255,255,0.05);
+  border-left-color:#fbbf24;
+}
+
+.memory-entry .address{min-width:40px;color:var(--muted);font-weight:600}
+.memory-entry .content{flex:1;color:#e6f0f6}
+.memory-entry .status{color:#fbbf24;font-weight:600}
+
+/* Task Record Card */
+.card.task{
+  min-width:300px;
+  flex:0 1 auto;
+  display:flex;
+  flex-direction:column;
+  height:300px;
+  overflow:hidden;
+}
+
+.card.task h3{color:var(--soft-blue);margin:0 0 8px;font-size:0.95rem}
+.card.task label{color:var(--muted);font-size:0.85rem;display:block;margin-bottom:6px}
+
+.task-record{
+  flex:1;
+  overflow-y:auto;
+  padding:8px;
+  border-radius:6px;
+  background:rgba(2,8,14,0.5);
+  border:1px solid rgba(255,255,255,0.02);
+  font-size:0.8rem;
+  font-family:monospace;
+  color:#e6f0f6;
+  resize:none;
+}
+
+/* Controls */
+.controls{display:flex;gap:12px;justify-content:center;margin:16px 0}
+
+.control-btn{
+  background:linear-gradient(90deg,#0b2b44,#003b66);
+  color:white;
+  border:none;
+  padding:10px 16px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:1.1rem;
+  font-weight:600;
+  transition:all 0.2s ease;
+}
+
+.control-btn:hover{
+  background:linear-gradient(90deg,#0d3a57,#004d7a);
+  box-shadow:0 0 12px rgba(var(--soft-blue-rgb),0.2);
+}
+
+/* Instruction Input Section */
+.instruction-input{margin-top:20px;background:rgba(2,8,14,0.3);padding:16px;border-radius:8px;border:1px solid rgba(255,255,255,0.02)}
+.instruction-input h2{color:var(--soft-blue);margin-top:0;font-size:1.1rem}
+
+.input-grid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:20px}
+
+.instruction-area h2{color:var(--soft-blue);font-size:1rem;margin:0 0 8px}
+.instruction-area textarea{
+  width:100%;
+  min-height:120px;
+  padding:8px;
+  border-radius:6px;
+  border:1px solid rgba(255,255,255,0.03);
+  background:rgba(2,8,14,0.6);
+  color:var(--soft-blue);
+  font-family:monospace;
+  resize:vertical;
+}
+
+.input-buttons{display:flex;gap:8px;margin-top:8px}
+
+.memory-input h3{color:var(--soft-blue);font-size:0.95rem;margin:0 0 8px}
+.memory-input-fields{display:flex;flex-direction:column;gap:8px}
+.memory-input-column{display:flex;gap:8px}
+.memory-input-column input{flex:1;padding:8px;border-radius:6px;border:1px solid rgba(255,255,255,0.03);background:rgba(2,8,14,0.6);color:var(--soft-blue)}
+
+.supported h3{color:var(--soft-blue);font-size:0.95rem;margin:0 0 8px}
+.supported ul{margin:0;padding-left:18px;color:#a8bcc4;font-size:0.85rem}
+.supported li{margin:4px 0}
+
+/* Buttons */
+.btn{
+  background:linear-gradient(90deg,#0b2b44,#003b66);
+  color:white;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  cursor:pointer;
+  font-weight:600;
+  transition:all 0.2s ease;
+  font-size:0.9rem;
+}
+
+.btn:hover{
+  background:linear-gradient(90deg,#0d3a57,#004d7a);
+  box-shadow:0 0 12px rgba(var(--soft-blue-rgb),0.15);
+}
+
+.btn.reset{
+  background:linear-gradient(90deg,rgba(56,189,248,0.15),rgba(56,189,248,0.05));
+  border:1px solid rgba(var(--soft-blue-rgb),0.4);
+  color:var(--soft-blue);
+}
+
+.btn.reset:hover{
+  background:linear-gradient(90deg,rgba(56,189,248,0.25),rgba(56,189,248,0.1));
+  border-color:rgba(var(--soft-blue-rgb),0.7);
+}
+
+.btn.set{
+  background:linear-gradient(90deg,rgba(56,189,248,0.15),rgba(56,189,248,0.05));
+  border:1px solid rgba(var(--soft-blue-rgb),0.4);
+  color:var(--soft-blue);
+}
+
+.btn.set:hover{
+  background:linear-gradient(90deg,rgba(56,189,248,0.25),rgba(56,189,248,0.1));
+  border-color:rgba(var(--soft-blue-rgb),0.7);
+}
+
+/* Input/Textarea styles */
+input[type="text"],
+textarea{
+  font-family:inherit;
+  color:inherit;
+}
+
+/* Responsive */
+@media (max-width:1200px){
+  .input-grid{grid-template-columns:1fr 1fr}
+}
+
+@media (max-width:768px){
+  .architecture-row{flex-direction:column}
+  .memory-section{flex-direction:column}
+  .input-grid{grid-template-columns:1fr}
+  main{padding:0 12px}
+}
+
+/* Harvard-specific modal styles */
+.modal-help { position: fixed; top: 80px; right: 20px; width: 300px; max-width: 85vw; background: #021826; padding: 12px 14px; border-radius: 8px; border: 1px solid rgba(56,189,248,0.2); box-shadow: 0 8px 32px rgba(0,0,0,0.8); z-index: 310; max-height: 65vh; overflow-y: auto; display: none; }
+#helpModal[aria-hidden="false"] { display: block; }
+#helpModal .modal-close { position: absolute; right: 8px; top: 6px; background: transparent; border: none; color: rgba(56,189,248,0.7); font-size: 16px; cursor: pointer; padding: 2px; display: flex; align-items: center; justify-content: center; }
+#helpModal .modal-close:hover { color: #38bdf8; transform: scale(1.2); transition: all 0.2s ease; }
+#helpModal h3 { margin: 0 0 8px; color: #38bdf8; font-size: 0.95rem; font-weight: 600; }
+.help-content { display: flex; flex-direction: column; gap: 6px; }
+.help-content p { margin: 0; color: #a8bcc4; font-size: 0.75rem; line-height: 1.4; }
+
+.instruction-input { height: 100px; }

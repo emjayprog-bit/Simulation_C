@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modified Harvard Architecture</title>
+  <link rel="stylesheet" href="modified.css" />
+</head>
+<body>
+  <header>
+    <button class="back-btn" onclick="window.location.href='index.html'">← Back to Selection</button>
+    <h1>Modified Harvard Architecture</h1>
+    <div class="info-container">
+      <button class="info-btn" onclick="toggleInfo()">
+        <span class="info-icon">ℹ️</span>
+        Info
+      </button>
+      <div class="info-dropdown" id="infoDropdown">
+        <h2>Modified Harvard Architecture</h2>
+        <p>Combines features of both architectures with separate caches but shared main memory.</p>
+
+        <h3>Advantages</h3>
+        <ul>
+          <li>Balance between performance and complexity</li>
+          <li>Flexible memory usage</li>
+          <li>Cache benefits for performance</li>
+        </ul>
+
+        <h3>Disadvantages</h3>
+        <ul>
+          <li>Moderate complexity</li>
+          <li>Cache management overhead</li>
+        </ul>
+      </div>
+    </div>
+  </header>
+
+  <main class="main-container">
+
+    <!-- Architecture Visualization -->
+    <section class="architecture">
+      <h2>Architecture Visualization</h2>
+
+      <!-- CPU + Memory Unit + Task Record -->
+      <div class="architecture-row memory-row">
+        <div class="card cpu">
+          <h3>Central Processing Unit</h3>
+          <p>Processes instructions and performs calculations</p>
+          <div class="cpu-content">
+            <div class="registers">
+              <h4>Registers</h4>
+              <p>
+                <label>R1:</label>
+                <input type="text" id="r1" value="0" readonly title="Register 1 Value">
+              </p>
+              <p>
+                <label>R2:</label>
+                <input type="text" id="r2" value="0" readonly title="Register 2 Value">
+              </p>
+              <p>
+                <label>R3:</label>
+                <input type="text" id="r3" value="0" readonly title="Register 3 Value">
+              </p>
+            </div>
+            <div class="alu">
+              <h4>ALU</h4>
+              <p>
+                <input type="text" id="alu-value" value="" readonly title="ALU Current Operation">
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Memory Unit (Shared) -->
+        <div class="card memory-unit-card">
+          <div class="memory-heading">
+            <div class="icon">💾</div>
+            <div>
+              <h3>Memory Unit</h3>
+              <p>Stores both instructions and data</p>
+            </div>
+          </div>
+
+          <div class="memory-unit">
+            <div class="memory-card">
+              <div class="card">
+                <h3 class="instruction-title">Instructions</h3>
+                <div class="memory-tables">
+                  <table class="instruction">
+                    <thead>
+                      <tr>
+                        <th>Addr</th>
+                        <th>Operation</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr class="highlight-row">
+                        <td>0</td>
+                        <td>LOAD R1, 100</td>
+                        <td class="status">← PC</td>
+                      </tr>
+                      <tr>
+                        <td>1</td>
+                        <td>LOAD R2, 200</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>2</td>
+                        <td>ADD R3, R1, R2</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>3</td>
+                        <td>STORE R3, 300</td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <div class="memory-card">
+              <div class="card">
+                <h3 class="data-title">Data</h3>
+                <div class="memory-tables">
+                  <table class="data">
+                    <thead>
+                      <tr>
+                        <th>Addr</th>
+                        <th>Value</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>100</td>
+                        <td>42</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>200</td>
+                        <td>58</td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td>300</td>
+                        <td>0</td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Task Record -->
+        <div class="card task">
+          <h3>Task Record</h3>
+          <label for="task-record">Simulation Tasks:</label>
+          <textarea id="task-record" readonly class="task-record" title="Task Record Log">No tasks recorded yet. Start simulation to see records.</textarea>
+        </div>
+      </div>
+
+      <!-- Control Buttons -->
+      <div class="controls">
+        <button class="control-btn play">▶ Play</button>
+        <button class="control-btn pause">⏸ Pause</button>
+        <button class="control-btn reset">⟳ Reset</button>
+      </div>
+    </section>
+
+    <!-- Instruction Input Section -->
+    <section class="instruction-input">
+      <div class="input-grid">
+        <div class="instruction-area">
+          <h2>Instruction Input</h2>
+          <textarea placeholder="Enter instructions (e.g., LOAD R1, 100)"></textarea>
+          <div class="input-buttons">
+            <button class="btn load">Load Instructions</button>
+            <button class="btn reset">Reset Instructions</button>
+          </div>
+        </div>
+
+        <div class="memory-input">
+          <h3>Direct Memory Input</h3>
+          <div class="memory-input-fields">
+            <input type="text" placeholder="Address" />
+            <input type="text" placeholder="Value" />
+            <button class="btn set">Set</button>
+          </div>
+        </div>
+
+        <div class="supported">
+          <h3>Supported Instructions:</h3>
+          <ul>
+            <li>LOAD reg, address</li>
+            <li>STORE reg, address</li>
+            <li>ADD dest, src1, src2</li>
+            <li>SUB dest, src1, src2</li>
+            <li>MUL dest, src1, src2</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    function toggleInfo() {
+      const dropdown = document.getElementById('infoDropdown');
+      dropdown.classList.toggle('show');
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function closeDropdown(e) {
+        if (!e.target.closest('.info-container')) {
+          dropdown.classList.remove('show');
+          document.removeEventListener('click', closeDropdown);
+        }
+      });
+    }
+  </script>
+</body>
+</html>

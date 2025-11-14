@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Computer Architecture Simulator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <h1>Computer Architecture Simulator</h1>
+    <p>Explore and understand how different computer architectures process data and instructions</p>
+  </header>
+
+  <main>
+    <div class="cards-container">
+      <!-- Von Neumann -->
+      <div class="card vonneumann" data-link="von.html">
+        <div class="icon-circle">
+          <img src="/public/von.png" alt="Von Neumann Icon">
+        </div>
+        <h2>Von Neumann</h2>
+        <p>Single memory for both data and instructions with a shared bus architecture</p>
+        <button class="explore-btn">Explore →</button>
+      </div>
+
+      <!-- Harvard -->
+      <div class="card harvard" data-link="harvard.html">
+        <div class="icon-circle">
+          <img src="/public/harvard.png" alt="Harvard Icon">
+        </div>
+        <h2>Harvard</h2>
+        <p>Separate memory and buses for data and instructions, enabling parallel access</p>
+        <button class="explore-btn">Explore →</button>
+      </div>
+
+      <!-- Modified Harvard -->
+      <div class="card modified" data-link="modified.html">
+        <div class="icon-circle">
+          <img src="/public/modified.png" alt="Modified Harvard Icon">
+        </div>
+        <h2>Modified Harvard</h2>
+        <p>Hybrid approach combining benefits of both architectures with flexible memory access</p>
+        <button class="explore-btn">Explore →</button>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Click on any architecture to start an interactive simulation. Watch data flow through components, execute instructions step-by-step, and learn how computers process information.</p>
+  </footer>
+
+  <script src="script.js"></script>
+</body>
+</html>
