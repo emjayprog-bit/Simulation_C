@@ -10,6 +10,8 @@
   <header class="top-header">
     <button class="back-btn" onclick="window.location.href='../index.html'">← Back</button>
     <h1 class="title">Von Neumann Architecture</h1>
+    <div class="loader"></div>
+
 
     <div class="header-right">
       <button id="playHeaderBtn" class="control-btn" title="Play/Pause">Play</button>
@@ -92,7 +94,7 @@
           <div class="memory-header">
             <h2>Memory Unit</h2>
             <div>
-              <button id="resetMemoryBtn" class="small-btn">Reset</button>
+              <button id="resetMemoryBtn" class="small-btn">Reset to Default</button>
             </div>
           </div>
 
@@ -117,7 +119,7 @@
             </div>
 
             <div class="direct-panel card">
-              <h3>Direct Memory Input</h3>
+              <h3>Data Input</h3>
               <input id="dataValueInput" placeholder="Data value (numeric)">
               <div class="input-actions">
                 <button id="setDataBtn" class="btn">Set</button>

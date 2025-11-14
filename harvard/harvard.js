@@ -477,3 +477,59 @@ stopHeaderBtn.addEventListener('click', ()=>{
 window.addEventListener('load', ()=> {
   resetMemory();
 });
+
+function updateLines() {
+  const leftCard = document.querySelector('.instruction-panel');
+  const cpuCard = document.querySelector('#cpuCard');
+  const rightCard = document.querySelector('.memory-card-panel');
+
+  const leftRect = leftCard.getBoundingClientRect();
+  const cpuRect = cpuCard.getBoundingClientRect();
+  const rightRect = rightCard.getBoundingClientRect();
+
+  const instrRed = document.getElementById('instrToCpuRed');
+  const instrYellow = document.getElementById('instrToCpuYellow');
+  const dataRed = document.getElementById('cpuToDataRed');
+  const dataYellow = document.getElementById('cpuToDataYellow');
+
+  // Instruction Memory → CPU
+  let startX = leftRect.right;
+  let endX = cpuRect.left;
+  let width = endX - startX;
+
+  instrRed.style.left = `${startX}px`;
+  instrRed.style.width = `${width}px`;
+  instrRed.style.top = `${leftRect.top + leftRect.height / 3}px`;
+
+  instrYellow.style.left = `${startX}px`;
+  instrYellow.style.width = `${width}px`;
+  instrYellow.style.top = `${leftRect.top + leftRect.height / 3 + 20}px`;
+
+  // CPU → Data Memory
+  startX = cpuRect.right;
+  endX = rightRect.left;
+  width = endX - startX;
+
+  dataRed.style.left = `${startX}px`;
+  dataRed.style.width = `${width}px`;
+  dataRed.style.top = `${cpuRect.top + cpuRect.height / 3}px`;
+
+  dataYellow.style.left = `${startX}px`;
+  dataYellow.style.width = `${width}px`;
+  dataYellow.style.top = `${cpuRect.top + cpuRect.height / 3 + 20}px`;
+}
+
+// Call on load and resize
+window.addEventListener('load', updateLines);
+window.addEventListener('resize', updateLines);
+
+function addTaskLog(message) {
+  const taskRecord = document.getElementById("taskRecord");
+  const div = document.createElement("div");
+  div.className = "task-line";
+  div.textContent = message;
+  taskRecord.appendChild(div); // append at bottom
+
+  // Auto-scroll to bottom
+  taskRecord.scrollTop = taskRecord.scrollHeight;
+}
