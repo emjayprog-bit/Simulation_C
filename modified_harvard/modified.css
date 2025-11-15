@@ -1,18 +1,1366 @@
-:root{
+:root {
   /* palette aligned with von.css */
-  --bg:#0f172a;
-  --soft-blue:#38bdf8; /* main cyan */
-  --soft-blue-rgb:56,189,248;
-  --muted:#94a3b8;
-  --mem-lime:#4ade80; /* green accent */
-  --mem-lime-rgb:74,222,128;
+  --bg: #0f172a;
+  --soft-blue: #38bdf8; /* main cyan */
+  --soft-blue-rgb: 56, 189, 248;
+  --muted: #94a3b8;
+  --mem-lime: #4ade80; /* green accent */
+  --mem-lime-rgb: 74, 222, 128;
   --card-bg: #1e293b;
-  /* Modified Harvard specific colors */
-  --cache-purple:#a78bfa;
-  --cache-purple-rgb:167,139,250;
-  --shared-mem-cyan:#06b6d4;
-  --shared-mem-cyan-rgb:6,182,212;
+  /* Harvard-specific colors */
+  --instr-blue: #38bdf8;
+  --instr-blue-rgb: 56, 189, 248;
+  --data-green: #4ade80;
+  --data-green-rgb: 74, 222, 128;
 }
+
+/* Base */
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: "Segoe UI", Tahoma, Arial, sans-serif;
+  background: linear-gradient(180deg, #02121a, #05182a);
+  color: #e6f0f6;
+  padding: 12px;
+}
+
+/* Header (original) */
+header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 12px;
+  background: rgba(6, 12, 20, 0.6);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.back-btn {
+  font-size: 1rem;
+  text-transform: uppercase;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(var(--soft-blue-rgb), 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: white;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.back-btn:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(var(--soft-blue-rgb), 0.7);
+  box-shadow: 0 0 12px rgba(var(--soft-blue-rgb), 0.2);
+}
+header h1 {
+  margin: 0;
+  font-size: 1.3rem;
+  color: var(--soft-blue);
+  flex: 1;
+  text-align: center;
+}
+
+.info-container {
+  position: relative;
+}
+.info-btn {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(var(--soft-blue-rgb), 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: var(--soft-blue);
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.info-btn:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(var(--soft-blue-rgb), 0.7);
+  box-shadow: 0 0 12px rgba(var(--soft-blue-rgb), 0.2);
+}
+.info-icon {
+  font-size: 1.1rem;
+}
+
+.info-dropdown {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 320px;
+  max-width: 85vw;
+  background: #021826;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(var(--soft-blue-rgb), 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  z-index: 310;
+  max-height: 65vh;
+  overflow-y: auto;
+  display: none;
+}
+.info-dropdown.show {
+  display: block;
+}
+.info-dropdown h2 {
+  margin: 0 0 8px;
+  color: var(--soft-blue);
+  font-size: 1rem;
+  font-weight: 600;
+}
+.info-dropdown h3 {
+  margin: 8px 0 4px;
+  color: var(--soft-blue);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+.info-dropdown p {
+  margin: 0 0 8px;
+  color: #a8bcc4;
+  font-size: 0.85rem;
+  line-height: 1.5;
+}
+.info-dropdown ul {
+  margin: 0;
+  padding-left: 16px;
+  color: #a8bcc4;
+  font-size: 0.85rem;
+}
+.info-dropdown li {
+  margin: 4px 0;
+}
+
+/* Main layout */
+.main-container {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+
+/* Architecture section */
+.architecture {
+  margin-bottom: 20px;
+}
+.architecture h2 {
+  color: var(--soft-blue);
+  margin-bottom: 12px;
+}
+
+.architecture-row {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  flex-wrap: wrap;
+}
+
+/* Card base */
+.card {
+  background: var(--card-bg);
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* CPU Card - Harvard (original) */
+.card.cpu {
+  border: 2px solid rgba(var(--soft-blue-rgb), 0.06);
+  padding: 14px;
+  min-width: 300px;
+  flex: 0 1 auto;
+}
+.card.cpu h3 {
+  color: var(--soft-blue);
+  margin: 0 0 6px;
+  font-size: 1rem;
+}
+.card.cpu > p {
+  color: var(--muted);
+  font-size: 0.9rem;
+  margin: 0 0 10px;
+}
+
+.cpu-content {
+  display: flex;
+  gap: 12px;
+}
+.registers {
+  flex: 1;
+}
+.registers h4 {
+  margin: 0 0 8px;
+  color: var(--soft-blue);
+  font-size: 0.9rem;
+}
+.registers p {
+  margin: 4px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.registers label {
+  width: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.registers input {
+  flex: 1;
+  min-width: 80px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: var(--soft-blue);
+  font-weight: 700;
+  text-align: center;
+}
+
+.alu {
+  flex: 1;
+}
+.alu h4 {
+  margin: 0 0 8px;
+  color: var(--soft-blue);
+  font-size: 0.9rem;
+}
+.alu input {
+  width: 100%;
+  padding: 6px 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: var(--soft-blue);
+  font-weight: 700;
+  text-align: center;
+}
+
+/* Memory Section */
+.memory-section {
+  display: flex;
+  gap: 16px;
+  flex: 1;
+  min-width: 300px;
+}
+
+.card.memory {
+  border: 2px solid;
+  padding: 12px;
+  flex: 1;
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.card.memory.instruction-memory {
+  border-color: rgba(var(--instr-blue-rgb), 0.2);
+}
+
+.card.memory.data-memory {
+  border-color: rgba(var(--data-green-rgb), 0.2);
+}
+
+.memory-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.memory-title .icon {
+  font-size: 1.3rem;
+}
+.memory-title h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.instruction-memory .memory-title h3 {
+  color: var(--instr-blue);
+}
+.data-memory .memory-title h3 {
+  color: var(--data-green);
+}
+
+.card.memory > p {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin: 0 0 8px;
+}
+
+.memory-list {
+  flex: 1;
+  overflow-y: auto;
+  max-height: 300px;
+}
+
+.memory-entry {
+  display: flex;
+  gap: 8px;
+  padding: 8px;
+  margin: 4px 0;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  font-size: 0.85rem;
+  border-left: 3px solid transparent;
+}
+
+.instruction-memory .memory-entry {
+  border-left-color: var(--instr-blue);
+}
+
+.data-memory .memory-entry {
+  border-left-color: var(--data-green);
+}
+
+.memory-entry.highlight {
+  background: rgba(255, 255, 255, 0.05);
+  border-left-color: #fbbf24;
+}
+
+.memory-entry .address {
+  min-width: 40px;
+  color: var(--muted);
+  font-weight: 600;
+}
+.memory-entry .content {
+  flex: 1;
+  color: #e6f0f6;
+}
+.memory-entry .status {
+  color: #fbbf24;
+  font-weight: 600;
+}
+
+/* Task Record Card */
+.card.task {
+  min-width: 300px;
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  height: 300px;
+  overflow: hidden;
+}
+
+.card.task h3 {
+  color: var(--soft-blue);
+  margin: 0 0 8px;
+  font-size: 0.95rem;
+}
+.card.task label {
+  color: var(--muted);
+  font-size: 0.85rem;
+  display: block;
+  margin-bottom: 6px;
+}
+
+.task-record {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(2, 8, 14, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  font-size: 0.8rem;
+  font-family: monospace;
+  color: #e6f0f6;
+  resize: none;
+}
+
+/* Controls */
+.controls {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin: 16px 0;
+}
+
+.control-btn {
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: linear-gradient(90deg, #0b2b44, #003b66);
+  box-shadow: 2px 2px #38bdf8;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid #38bdf8;
+  cursor: pointer;
+}
+.control-btn:active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}
+
+/* Instruction Input Section (original) */
+.instruction-input {
+  margin-top: 20px;
+  background: rgba(2, 8, 14, 0.3);
+  padding: 16px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+}
+.instruction-input h2 {
+  color: var(--soft-blue);
+  margin-top: 0;
+  font-size: 1.1rem;
+}
+
+.input-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 20px;
+}
+
+.instruction-area h2 {
+  color: var(--soft-blue);
+  font-size: 1rem;
+  margin: 0 0 8px;
+}
+.instruction-area textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: var(--soft-blue);
+  font-family: monospace;
+  resize: vertical;
+}
+
+.input-buttons {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.memory-input h3 {
+  color: var(--soft-blue);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+}
+.memory-input-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.memory-input-column {
+  display: flex;
+  gap: 8px;
+}
+.memory-input-column input {
+  flex: 1;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: var(--soft-blue);
+}
+
+.supported h3 {
+  color: var(--soft-blue);
+  font-size: 0.95rem;
+  margin: 0 0 8px;
+}
+.supported ul {
+  margin: 0;
+  padding-left: 18px;
+  color: #a8bcc4;
+  font-size: 0.85rem;
+}
+.supported li {
+  margin: 4px 0;
+}
+
+/* Buttons (original) */
+.btn {
+  background: linear-gradient(90deg, #0b2b44, #003b66);
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  font-size: 0.9rem;
+}
+
+.btn:hover {
+  background: linear-gradient(90deg, #0d3a57, #004d7a);
+  box-shadow: 0 0 12px rgba(var(--soft-blue-rgb), 0.15);
+}
+
+.btn.reset {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(var(--soft-blue-rgb), 0.4);
+  color: var(--soft-blue);
+}
+
+.btn.reset:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(var(--soft-blue-rgb), 0.7);
+}
+
+.btn.set {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(var(--soft-blue-rgb), 0.4);
+  color: var(--soft-blue);
+}
+
+.btn.set:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(var(--soft-blue-rgb), 0.7);
+}
+
+/* Input/Textarea styles (original) */
+input[type="text"],
+textarea {
+  font-family: inherit;
+  color: inherit;
+}
+
+/* Responsive (original) */
+@media (max-width: 1200px) {
+  .input-grid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .architecture-row {
+    flex-direction: column;
+  }
+  .memory-section {
+    flex-direction: column;
+  }
+  .input-grid {
+    grid-template-columns: 1fr;
+  }
+  main {
+    padding: 0 12px;
+  }
+}
+
+/* Harvard-specific modal styles (original) */
+.modal-help {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 300px;
+  max-width: 85vw;
+  background: #021826;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  z-index: 310;
+  max-height: 65vh;
+  overflow-y: auto;
+  display: none;
+}
+#helpModal[aria-hidden="false"] {
+  display: block;
+}
+#helpModal .modal-close {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  background: transparent;
+  border: none;
+  color: rgba(56, 189, 248, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#helpModal .modal-close:hover {
+  color: #38bdf8;
+  transform: scale(1.2);
+  transition: all 0.2s ease;
+}
+#helpModal h3 {
+  margin: 0 0 8px;
+  color: #38bdf8;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.help-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.help-content p {
+  margin: 0;
+  color: #a8bcc4;
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+/* Extended styles for harvard simulation */
+.page-wrap {
+  max-width: 100%;
+  margin: 0 auto;
+  padding: 0 40px;
+}
+.top-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 8px 12px;
+  background: rgba(6, 12, 20, 0.6);
+  border-radius: 8px;
+  margin-bottom: 14px;
+  position: relative;
+}
+.back-btn {
+  position: absolute;
+  left: 12px;
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 8px 12px;
+  border-radius: 8px;
+  color: #38bdf8;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.back-btn:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+.title {
+  margin: 0;
+  font-size: 2.05rem;
+  color: #4ade80;
+}
+.header-right {
+  position: absolute;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+.icon-btn {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 8px 10px;
+  border-radius: 8px;
+  color: #38bdf8;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.icon-btn:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.2);
+}
+.control-btn {
+  font-size: 1rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  background: linear-gradient(90deg, #0b2b44, #003b66);
+  box-shadow: 2px 2px #38bdf8;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 10px;
+  border: 2px solid #38bdf8;
+  cursor: pointer;
+}
+.control-btn:active {
+  box-shadow: none;
+  transform: translate(2px, 2px);
+}
+
+/* Layout structure */
+.simulation-wrapper {
+  display: flex;
+  gap: 20px;
+  align-items: flex-start;
+  justify-content: center;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+/* Instruction input on left */
+.left-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 360px;
+}
+
+/* CPU in center */
+.center-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+}
+
+/* Memory on right */
+.right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 420px;
+}
+
+/* Bus styles */
+.buses-row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+  height: 40px;
+}
+.bus-segment {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bus-line-h {
+  height: 3px;
+  width: 60px;
+  border-radius: 2px;
+  background: rgba(56, 189, 248, 0.5);
+  transition: all 0.3s ease;
+}
+.bus-line-h.active {
+  background: #38bdf8;
+  box-shadow: 0 0 8px rgba(56, 189, 248, 0.6);
+}
+.bus-label {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  min-width: 50px;
+  text-align: center;
+}
+
+/* Colored bus lines */
+.addr-bus-line {
+  background: #fef08a;
+  height: 2px;
+  width: 80px;
+  transition: all 0.3s ease;
+}
+.addr-bus-line.glow {
+  background: #fef08a;
+  box-shadow: 0 0 12px #fef08a;
+}
+.data-bus-line {
+  background: #ef4444;
+  height: 2px;
+  width: 80px;
+  transition: all 0.3s ease;
+}
+.data-bus-line.glow {
+  background: #ef4444;
+  box-shadow: 0 0 12px #ef4444;
+}
+
+/* Side-by-side buses */
+.buses-row-duo {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0;
+}
+.bus-segment-duo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.bus-label-duo {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  font-weight: 600;
+  min-width: 60px;
+  text-align: center;
+}
+
+/* Card styles */
+.card {
+  background: #1e293b;
+  border-radius: 10px;
+  padding: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+/* CPU Card */
+.cpu-card {
+  border: 2px solid rgba(56, 189, 248, 0.06);
+  padding: 14px;
+  width: 100%;
+}
+.cpu-card h2 {
+  color: #FF4040;
+  margin: 0 0 8px;
+  font-size: 1rem;
+}
+
+.registers {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.gen-regs-row {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.gen-regs-row .reg-row {
+  flex: 1 1 90px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 72px;
+}
+.gen-regs-row .reg-row label {
+  width: 35px;
+  color: #94a3b8;
+  font-weight: 700;
+  min-width: 35px;
+}
+.gen-regs-row .reg-row input {
+  flex: 1;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  background: rgba(2, 8, 14, 0.6);
+  color: #38bdf8;
+  font-weight: 700;
+  text-align: center;
+  min-width: 72px;
+}
+
+.reg-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.reg-row label {
+  width: 60px;
+  color: #94a3b8;
+  font-weight: 700;
+}
+.reg-row input {
+  flex: 1;
+  padding: 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: #38bdf8;
+  font-weight: 700;
+  text-align: center;
+}
+
+.unit-columns {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.unit {
+  flex: 1;
+  padding: 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  background: rgba(2, 8, 14, 0.5);
+}
+.unit h3 {
+  margin: 0;
+  color: #FF4040;
+  font-size: 0.95rem;
+}
+.unit-log {
+  margin-top: 8px;
+  color: #94a3b8;
+  font-weight: 700;
+  font-size: 0.85rem;
+  min-height: 30px;
+}
+
+/* Table styles */
+.instruction-table,
+.memory-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 8px;
+  border-radius: 6px;
+  overflow: hidden;
+}
+.instruction-table thead {
+  background: linear-gradient(180deg, #38bdf8, #06b6d4);
+}
+.memory-table thead {
+  background: linear-gradient(180deg, #4ade80, #22c55e);
+}
+
+.instruction-table th {
+  color: #021826;
+  padding: 8px;
+  text-align: left;
+  font-weight: 700;
+}
+.memory-table th {
+  color: #0a1f0a;
+  padding: 8px;
+  text-align: left;
+  font-weight: 700;
+}
+
+.instruction-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.2);
+  color: #a8d5ff;
+  background: rgba(56, 189, 248, 0.02);
+}
+.memory-table td {
+  padding: 8px;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.2);
+  color: #86efac;
+  background: rgba(74, 222, 128, 0.02);
+}
+
+/* Action column */
+.instruction-table th:last-child {
+  width: 80px;
+  text-align: center;
+}
+.memory-table th:last-child {
+  width: 80px;
+  text-align: center;
+}
+.instruction-table td:last-child {
+  text-align: center;
+  padding: 4px;
+}
+.memory-table td:last-child {
+  text-align: center;
+  padding: 4px;
+}
+
+/* Sticky table header for instruction memory */
+.instruction-table thead tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+.instruction-table thead th {
+  position: sticky;
+  top: 0;
+  background: linear-gradient(180deg, #38bdf8, #06b6d4);
+  z-index: 2;
+}
+
+/* Ensure tbody scrolls */
+.instruction-panel .table-wrapper {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Table wrapper for scrolling */
+.table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  min-height: 200px;
+  display: flex;
+  flex-direction: column;
+}
+.table-wrapper table {
+  flex: 0 0 auto;
+}
+.table-wrapper tbody {
+  overflow-y: auto;
+  display: block;
+  width: 100%;
+}
+.table-wrapper thead {
+  display: block;
+  width: 100%;
+}
+.table-wrapper tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.table-wrapper thead tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* Input sections */
+.instruction-panel,
+.memory-card-panel {
+  border: 2px solid;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  height: 450px;
+}
+.instruction-panel {
+  border-color: rgba(56, 189, 248, 0.06);
+}
+.memory-card-panel {
+  border-color: rgba(74, 222, 128, 0.06);
+}
+
+.instruction-input-panel,
+.direct-memory-panel {
+  border: 2px solid rgba(56, 189, 248, 0.06);
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 0;
+}
+.direct-memory-panel {
+  border-color: rgba(74, 222, 128, 0.06);
+}
+.direct-memory-panel h3 {
+  margin: 0 0 4px;
+  color: #4ade80;
+  font-size: 0.95rem;
+}
+
+.panel-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.panel-head h3 {
+  margin: 0;
+  color: #38bdf8;
+  font-size: 0.95rem;
+}
+.memory-card-panel .panel-head h3 {
+  color: #4ade80;
+}
+
+.small-icon {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: #38bdf8;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.small-icon:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.small-btn {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  color: #38bdf8;
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  padding: 6px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s ease;
+}
+.small-btn:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(56, 189, 248, 0.7);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.15);
+}
+
+.btn {
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, #0b2b44, #003b66);
+  color: white;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn:hover {
+  background: linear-gradient(90deg, #0d3a57, #004d7a);
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.15);
+}
+.btn.ghost {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.15),
+    rgba(56, 189, 248, 0.05)
+  );
+  border: 1px solid rgba(56, 189, 248, 0.4);
+  color: #38bdf8;
+}
+.btn.ghost:hover {
+  background: linear-gradient(
+    90deg,
+    rgba(56, 189, 248, 0.25),
+    rgba(56, 189, 248, 0.1)
+  );
+  border-color: rgba(56, 189, 248, 0.7);
+}
+
+textarea,
+input {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.03);
+  background: rgba(2, 8, 14, 0.6);
+  color: #38bdf8;
+}
+
+.table-wrapper {
+  flex: 1;
+  overflow-y: auto;
+}
+.input-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.task-record {
+  width: 100%;
+  max-height: 220px;
+  overflow: hidden;
+  padding: 0;
+  background: rgba(2, 8, 14, 0.5);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.02);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+}
+.task-record-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+  background: rgba(2, 8, 14, 0.5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.02);
+  flex-shrink: 0;
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+.task-record-header h3 {
+  margin: 0;
+  color: #38bdf8;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.task-record-box {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  padding: 10px;
+  flex: 1;
+  min-height: 200px;
+}
+
+.task-group {
+  margin-bottom: 12px;
+  padding: 8px;
+  border-radius: 6px;
+  background: rgba(56, 189, 248, 0.03);
+  border: 1px solid rgba(56, 189, 248, 0.03);
+}
+.task-group h4 {
+  margin: 0 0 6px;
+  color: #38bdf8;
+  font-size: 0.85rem;
+}
+.task-line {
+  font-family: monospace;
+  color: #e6f0f6;
+  margin: 3px 0;
+  font-size: 0.8rem;
+}
+
+/* Modal */
+#infoModal {
+  position: fixed;
+  top: 80px;
+  right: 20px;
+  width: 300px;
+  max-width: 85vw;
+  background: #021826;
+  padding: 12px 14px;
+  border-radius: 8px;
+  border: 1px solid rgba(56, 189, 248, 0.2);
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8);
+  z-index: 310;
+  max-height: 65vh;
+  overflow-y: auto;
+  display: none;
+}
+#infoModal[aria-hidden="false"] {
+  display: block;
+}
+#infoModal h3 {
+  margin: 0 0 8px;
+  color: #38bdf8;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+#infoModal p {
+  margin: 0;
+  color: #a8bcc4;
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+#infoModal .modal-close {
+  position: absolute;
+  right: 8px;
+  top: 6px;
+  background: transparent;
+  border: none;
+  color: rgba(56, 189, 248, 0.7);
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#infoModal .modal-close:hover {
+  color: #38bdf8;
+  transform: scale(1.2);
+  transition: all 0.2s ease;
+}
+
+.connect-line {
+  position: absolute;
+  height: 4px;
+  top: 240px;
+  background-color: currentColor;
+  transition: all 0.3s ease;
+  z-index: 5;
+}
+
+.red-line {
+  background-color: #ef4444;
+}
+
+.yellow-line {
+  background-color: #fef08a;
+  top: 260px;
+}
+
+/* Memory Unit Section Styling (for combined instruction + data memory) */
+.memory-unit-section {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 200px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+
+.memory-unit-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #38bdf8;
+  margin-bottom: 4px;
+  padding: 4px 0;
+  border-bottom: 1px solid rgba(56, 189, 248, 0.1);
+}
+
+.memory-unit-section .table-wrapper {
+  flex: 1;
+  min-height: 150px;
+  max-height: 220px;
+}
+
 
 /* Base */
 *{box-sizing:border-box}

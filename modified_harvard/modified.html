@@ -3,224 +3,180 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Modified Harvard Architecture</title>
+  <title>Modified Harvard Architecture Simulation</title>
   <link rel="stylesheet" href="modified.css" />
 </head>
 <body>
-  <header>
-    <button class="back-btn" onclick="window.location.href='../index.html'">← Back to Selection</button>
-    <h1>Modified Harvard Architecture</h1>
-    <div class="info-container">
-      <button class="info-btn" onclick="toggleInfo()">
-        <span class="info-icon">ℹ️</span>
-        Info
-      </button>
-      <div class="info-dropdown" id="infoDropdown">
-        <h2>Modified Harvard Architecture</h2>
-        <p>Combines features of both architectures with separate caches but shared main memory.</p>
-
-        <h3>Advantages</h3>
-        <ul>
-          <li>Balance between performance and complexity</li>
-          <li>Flexible memory usage</li>
-          <li>Cache benefits for performance</li>
-        </ul>
-
-        <h3>Disadvantages</h3>
-        <ul>
-          <li>Moderate complexity</li>
-          <li>Cache management overhead</li>
-        </ul>
-      </div>
+  <header class="top-header">
+    <button class="back-btn" onclick="window.location.href='../index.html'">← Back</button>
+    <h1 class="title">Modified Harvard Architecture Simulation</h1>
+    <div class="header-right">
+      <button id="playHeaderBtn" class="control-btn" title="Play">Play</button>
+      <button id="stopHeaderBtn" class="control-btn" title="Stop">Stop</button>
+      <button id="infoBtn" class="icon-btn" title="Info">ℹ️</button>
     </div>
   </header>
 
-  <main class="main-container">
-
-    <!-- Architecture Visualization -->
-    <section class="architecture">
-      <h2>Architecture Visualization</h2>
-
-      <!-- CPU + Memory Unit + Task Record -->
-      <div class="architecture-row memory-row">
-        <div class="card cpu">
-          <h3>Central Processing Unit</h3>
-          <p>Processes instructions and performs calculations</p>
-          <div class="cpu-content">
-            <div class="registers">
-              <h4>Registers</h4>
-              <p>
-                <label>R1:</label>
-                <input type="text" id="r1" value="0" readonly title="Register 1 Value">
-              </p>
-              <p>
-                <label>R2:</label>
-                <input type="text" id="r2" value="0" readonly title="Register 2 Value">
-              </p>
-              <p>
-                <label>R3:</label>
-                <input type="text" id="r3" value="0" readonly title="Register 3 Value">
-              </p>
-            </div>
-            <div class="alu">
-              <h4>ALU</h4>
-              <p>
-                <input type="text" id="alu-value" value="" readonly title="ALU Current Operation">
-              </p>
-            </div>
+  <main class="page-wrap">
+    <!-- Three-column layout: Instruction Input | CPU + Buses | Memory Unit -->
+    <div class="simulation-wrapper">
+      <!-- LEFT: Instruction Input Panel -->
+      <div class="left-column">
+        <!-- Instruction Input Panel -->
+        <div class="card instruction-input-panel" id="instructionPanel">
+          <div class="panel-head">
+            <h3>Instruction Input</h3>
+            <button id="helpBtn" class="small-icon" title="Help">?</button>
+          </div>
+          <textarea id="instructionInput" placeholder="One instruction per line. Examples:MOV R1, #5   ADD R3, R1, R2"></textarea>
+          <div class="input-actions">
+            <button id="loadInstructionBtn" class="btn">Load</button>
+            <button id="clearInstructionBtn" class="btn ghost">Clear</button>
           </div>
         </div>
 
-        <!-- Memory Unit (Shared) -->
-        <div class="card memory-unit-card">
-          <div class="memory-heading">
-            <div class="icon">💾</div>
-            <div>
-              <h3>Memory Unit</h3>
-              <p>Stores both instructions and data</p>
-            </div>
-          </div>
-
-          <div class="memory-unit">
-            <div class="memory-card">
-              <div class="card">
-                <h3 class="instruction-title">Instructions</h3>
-                <div class="memory-tables">
-                  <table class="instruction">
-                    <thead>
-                      <tr>
-                        <th>Addr</th>
-                        <th>Operation</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr class="highlight-row">
-                        <td>0</td>
-                        <td>LOAD R1, 100</td>
-                        <td class="status">← PC</td>
-                      </tr>
-                      <tr>
-                        <td>1</td>
-                        <td>LOAD R2, 200</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>2</td>
-                        <td>ADD R3, R1, R2</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>3</td>
-                        <td>STORE R3, 300</td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-
-            <div class="memory-card">
-              <div class="card">
-                <h3 class="data-title">Data</h3>
-                <div class="memory-tables">
-                  <table class="data">
-                    <thead>
-                      <tr>
-                        <th>Addr</th>
-                        <th>Value</th>
-                        <th>Status</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr>
-                        <td>100</td>
-                        <td>42</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>200</td>
-                        <td>58</td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td>300</td>
-                        <td>0</td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
+        <!-- Direct Memory Input Panel -->
+        <div class="card direct-memory-panel">
+          <h3>Data Memory Input</h3>
+          <input id="dataValueInput" placeholder="Data value (numeric)">
+          <div class="input-actions">
+            <button id="setDataBtn" class="btn">Set</button>
+            <button id="clearDataBtn" class="btn ghost">Clear</button>
           </div>
         </div>
+      </div>
+
+      <!-- Connecting lines from Memory Unit to CPU -->
+      <div id="instrToCpuRed" class="connect-line red-line"></div>
+      <div id="instrToCpuYellow" class="connect-line yellow-line"></div>
+
+      <!-- CENTER: Buses + CPU + Task Record -->
+      <div class="center-column">
+          <!-- Side-by-side Address and Data Buses -->
+          <div class="buses-row-duo">
+            <div class="bus-segment-duo">
+              <span class="bus-label-duo">Address Bus</span>
+              <div id="addrLine" class="addr-bus-line"></div>
+            </div>
+            <div class="bus-segment-duo">
+              <span class="bus-label-duo">Data Bus</span>
+              <div id="dataLine" class="data-bus-line"></div>
+            </div>
+          </div>
+
+          <!-- CPU Card -->
+          <article class="card cpu-card" id="cpuCard">
+          <h2>Central Processing Unit (CPU)</h2>
+          <div class="registers">
+            <div class="gen-regs-row">
+              <div class="reg-row">
+                <label>R1</label><input id="r1" value="0" readonly>
+              </div>
+              <div class="reg-row">
+                <label>R2</label><input id="r2" value="0" readonly>
+              </div>
+              <div class="reg-row">
+                <label>R3</label><input id="r3" value="0" readonly>
+              </div>
+            </div>
+            <div class="reg-row">
+              <label>PC</label><input id="pc" value="0001" readonly>
+            </div>
+            <div class="reg-row">
+              <label>IR</label><input id="ir" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>MAR</label><input id="mar" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>MDR</label><input id="mdr" value="" readonly>
+            </div>
+            <div class="reg-row">
+              <label>ACC</label><input id="acc" value="" readonly>
+            </div>
+          </div>
+          <div class="unit-columns">
+            <div class="unit control-unit">
+              <h3>Control Unit</h3>
+              <div id="controlUnitLog" class="unit-log">Waiting for instruction...</div>
+            </div>
+            <div class="unit alu-unit">
+              <h3>ALU</h3>
+              <div id="aluLog" class="unit-log">Ready...</div>
+            </div>
+          </div>
+        </article>
 
         <!-- Task Record -->
-        <div class="card task">
-          <h3>Task Record</h3>
-          <label for="task-record">Simulation Tasks:</label>
-          <textarea id="task-record" readonly class="task-record" title="Task Record Log">No tasks recorded yet. Start simulation to see records.</textarea>
+        <div class="card task-record">
+          <div class="task-record-header">
+            <h3>Task Record</h3>
+            <button id="clearLogsBtn" class="btn ghost">Clear Logs</button>
+          </div>
+          <div id="taskRecord" class="task-record-box"></div>
         </div>
       </div>
 
-      <!-- Control Buttons -->
-      <div class="controls">
-        <button class="control-btn play">▶ Play</button>
-        <button class="control-btn pause">⏸ Pause</button>
-        <button class="control-btn reset">⟳ Reset</button>
-      </div>
-    </section>
+      <!-- Horizontal connecting lines from CPU to Memory Unit -->
+      <div id="cpuToDataRed" class="connect-line red-line"></div>
+      <div id="cpuToDataYellow" class="connect-line yellow-line"></div>
 
-    <!-- Instruction Input Section -->
-    <section class="instruction-input">
-      <div class="input-grid">
-        <div class="instruction-area">
-          <h2>Instruction Input</h2>
-          <textarea placeholder="Enter instructions (e.g., LOAD R1, 100)"></textarea>
-          <div class="input-buttons">
-            <button class="btn load">Load Instructions</button>
-            <button class="btn reset">Reset Instructions</button>
+      <!-- RIGHT: Memory Unit (combined with instruction on top, data on bottom) -->
+      <div class="right-column">
+        <div class="card memory-card-panel">
+          <div class="panel-head">
+            <h3>Memory Unit</h3>
+          </div>
+          
+          <!-- Instruction Memory Table (top) -->
+          <div class="memory-unit-section">
+            <div class="section-label">Instruction Memory</div>
+            <div class="table-wrapper">
+              <table class="instruction-table">
+                <thead>
+                    <tr><th>Address</th><th>Instruction</th><th>Action</th></tr>
+                </thead>
+                <tbody id="instrMemoryBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Data Memory Table (bottom) -->
+          <div class="memory-unit-section">
+            <div class="section-label">Data Memory</div>
+            <div class="table-wrapper">
+              <table class="memory-table" aria-live="polite">
+                  <thead><tr><th>Address</th><th>Data</th><th>Action</th></tr></thead>
+                <tbody id="memoryBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-
-        <div class="memory-input">
-          <h3>Direct Memory Input</h3>
-          <div class="memory-input-fields">
-            <input type="text" placeholder="Address" />
-            <input type="text" placeholder="Value" />
-            <button class="btn set">Set</button>
-          </div>
-        </div>
-
-        <div class="supported">
-          <h3>Supported Instructions:</h3>
-          <ul>
-            <li>LOAD reg, address</li>
-            <li>STORE reg, address</li>
-            <li>ADD dest, src1, src2</li>
-            <li>SUB dest, src1, src2</li>
-            <li>MUL dest, src1, src2</li>
-          </ul>
-        </div>
       </div>
-    </section>
+    </div>
   </main>
 
-  <script>
-    function toggleInfo() {
-      const dropdown = document.getElementById('infoDropdown');
-      dropdown.classList.toggle('show');
+  <!-- Info Modal -->
+  <div id="infoModal" aria-hidden="true">
+    <button class="modal-close" id="infoClose">✖</button>
+    <h3>Modified Harvard Architecture</h3>
+    <p>
+      Modified Harvard architecture combines features of both Harvard and Von Neumann designs with unified memory access while maintaining separate instruction and data caches.
+    </p>
+  </div>
 
-      // Close dropdown when clicking outside
-      document.addEventListener('click', function closeDropdown(e) {
-        if (!e.target.closest('.info-container')) {
-          dropdown.classList.remove('show');
-          document.removeEventListener('click', closeDropdown);
-        }
-      });
-    }
-  </script>
+  <!-- Help Modal -->
+  <div id="helpModal" aria-hidden="true" class="modal-help">
+    <button class="modal-close" id="helpClose">✖</button>
+    <h3>Instruction Examples</h3>
+    <div class="help-content">
+      <p><b>MOV</b>: <code>MOV R1, #5</code> — move 5 into R1</p>
+      <p><b>ADD</b>: <code>ADD R1, R2, R3</code> — adds R2 + R3 → R1</p>
+      <p><b>LOAD</b>: <code>LOAD R1, 1000</code> — load memory[1000] → R1</p>
+      <p><b>STORE</b>: <code>STORE R1, 1001</code> — store R1 → memory[1001]</p>
+    </div>
+  </div>
+
+  <script src="modified.js"></script>
 </body>
 </html>
