@@ -1,4 +1,5 @@
 // harvard.js — Harvard Architecture simulation with separate instruction/data memory
+// MEDIUM SPEED - Pure Harvard (separate buses but older design)
 // Elements
 const infoBtn = document.getElementById('infoBtn');
 const infoModal = document.getElementById('infoModal');
@@ -44,14 +45,14 @@ const taskRecord = document.getElementById('taskRecord');
 const clearLogsBtn = document.getElementById('clearLogsBtn');
 
 // state
-const instrMemory = new Map(); // addresses 0-6 (instructions, blue)
-const dataMemory = new Map();  // addresses 1000-1003 (data, green)
+const instrMemory = new Map(); // addresses 0-99 (instructions)
+const dataMemory = new Map();  // addresses 1000+ (data)
 let running = false;
 let instructionCounter = 0;
 let programCounter = 0;
 
-// timings (ms)
-const TIM = { fetch: 900, decode: 700, execute: 900, store: 700, between: 250 };
+// timings (ms) - HARVARD: MEDIUM speed (pure Harvard but older/simpler design)
+const TIM = { fetch: 850, decode: 700, execute: 900, store: 700, between: 250 };
 
 // default memory entries for Harvard
 const INSTR_DEFAULTS = [
@@ -83,7 +84,7 @@ function glow(el, duration = 1200){
   setTimeout(()=> el.classList.remove('glow'), duration + 50);
 }
 
-// render instruction memory table (addresses 0-6, blue theme)
+// render instruction memory table
 function renderInstructionMemory(){
   const addrs = Array.from(instrMemory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   instrMemoryBody.innerHTML = '';
@@ -96,7 +97,6 @@ function renderInstructionMemory(){
     const tdData = document.createElement('td');
     tdData.contentEditable = true;
     tdData.textContent = entry;
-    // when user finishes edit, update memory
     tdData.addEventListener('blur', ()=> {
       instrMemory.set(Number(a), tdData.textContent.trim());
     });
@@ -116,7 +116,7 @@ function renderInstructionMemory(){
   }
 }
 
-// render data memory table (addresses 1000-1003, green theme)
+// render data memory table
 function renderDataMemory(){
   const addrs = Array.from(dataMemory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   memoryBody.innerHTML = '';
@@ -129,7 +129,6 @@ function renderDataMemory(){
     const tdData = document.createElement('td');
     tdData.contentEditable = true;
     tdData.textContent = entry;
-    // when user finishes edit, update memory
     tdData.addEventListener('blur', ()=> {
       dataMemory.set(Number(a), tdData.textContent.trim());
     });
@@ -229,28 +228,39 @@ document.addEventListener('click', (e)=> {
 // load instructions to instruction memory
 loadInstructionBtn.addEventListener('click', ()=>{
   const text = instructionInput.value.trim();
-  if(!text) return;
+  if(!text) {
+    logTask('⚠️ No instructions to load. Please enter instructions first.');
+    return;
+  }
   const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  
+  instrMemory.clear();
+  
   let addr = 0;
+  let loadedCount = 0;
   for(const l of lines){
-    if(addr <= 6){
+    if(addr <= 99){
       instrMemory.set(addr, l);
       addr++;
+      loadedCount++;
     }
   }
+  
   instructionInput.value = '';
   renderInstructionMemory();
-  logTask('Loaded new instruction(s) to instruction memory.');
+  
+  programCounter = 0;
+  instructionCounter = 0;
+  pcField.value = pad(0);
+  
+  logTask(`✅ Loaded ${loadedCount} instruction(s) to instruction memory (addresses 0-${loadedCount-1}).`);
 });
 
-// clear instruction textarea
 clearInstructionBtn.addEventListener('click', ()=> instructionInput.value = '');
 
-// set direct data (auto address at >=1000)
 setDataBtn.addEventListener('click', ()=>{
   const v = dataValueInput.value.trim();
   if(!v) return;
-  // find next available data address starting from 1000
   let addr = 1000;
   while(dataMemory.has(addr) && addr < 1010) addr++;
   dataMemory.set(addr, v);
@@ -259,25 +269,20 @@ setDataBtn.addEventListener('click', ()=>{
   logTask(`Direct memory set -> data memory[${pad(addr)}] = ${v}`);
 });
 
-// clear data input
 clearDataBtn.addEventListener('click', ()=> dataValueInput.value = '');
 
-// resolve operand token (register, immediate, address)
 function resolveOperandToken(token){
   if(!token) return undefined;
   token = token.trim();
-  // register
   if(/^R[123]$/i.test(token)){
     const rv = document.getElementById(token.toLowerCase()).value;
     return Number.isNaN(Number(rv)) ? rv : Number(rv);
   }
-  // immediate literal like #5
   if(token.startsWith('#')){
     const lit = token.slice(1);
     const n = Number(lit);
     return Number.isNaN(n) ? lit : n;
   }
-  // data memory address numeric (1000+)
   if(/^\d+$/.test(token)){
     const n = Number(token);
     if(dataMemory.has(n)) {
@@ -286,12 +291,10 @@ function resolveOperandToken(token){
     }
     return null;
   }
-  // plain number?
   if(!Number.isNaN(Number(token))) return Number(token);
   return token;
 }
 
-// main execution cycle for one instruction at address addr (in instruction memory)
 async function runCycleAt(addr){
   if(!instrMemory.has(addr)) {
     appendInstructionLog(`Instruction ${instructionCounter}:`, [`No instruction at address ${pad(addr)}`]);
@@ -300,7 +303,10 @@ async function runCycleAt(addr){
   const ins = instrMemory.get(addr);
   instructionCounter++;
 
+  const cycleStartTime = performance.now();
+
   // FETCH
+  const fetchStart = performance.now();
   pcField.value = pad(addr);
   marField.value = pad(addr);
   controlUnitLog.textContent = 'Fetching instruction';
@@ -308,20 +314,23 @@ async function runCycleAt(addr){
   irField.value = '';
   glow(addrLine, TIM.fetch + 300);
   glow(cpuCard, TIM.fetch + 300);
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `${TIM.fetch}ms`]);
   await delay(TIM.fetch);
+  const fetchTime = (performance.now() - fetchStart).toFixed(2);
 
-  // put into MDR and IR
   mdrField.value = ins;
   irField.value = ins;
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `⏱️ ${fetchTime}ms`]);
 
   // DECODE
+  const decodeStart = performance.now();
   controlUnitLog.textContent = 'Decoded instruction';
   glow(cpuCard, TIM.decode + 300);
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- DECODE ---', `Decoded: ${ins}`, `${TIM.decode}ms`]);
   await delay(TIM.decode);
+  const decodeTime = (performance.now() - decodeStart).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- DECODE ---', `Decoded: ${ins}`, `⏱️ ${decodeTime}ms`]);
 
   // EXECUTE
+  const executeStart = performance.now();
   controlUnitLog.textContent = 'Executing instruction';
   glow(dataLine, TIM.execute + 300);
   glow(cpuCard, TIM.execute + 300);
@@ -407,18 +416,20 @@ async function runCycleAt(addr){
   }
 
   aluLog.textContent = aluExpression || 'Executing...';
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `${TIM.execute}ms`]);
   await delay(TIM.execute);
+  const executeTime = (performance.now() - executeStart).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `⏱️ ${executeTime}ms`]);
 
-  // advance program counter
   programCounter = addr + 1;
   pcField.value = pad(programCounter);
   controlUnitLog.textContent = `Completed instruction ${pad(addr)}`;
 
   await delay(TIM.between);
+  
+  const totalCycleTime = (performance.now() - cycleStartTime).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, [`✅ Total cycle time: ${totalCycleTime}ms`, `---`]);
 }
 
-// find next instruction from start address
 function findNextInstructionFrom(start){
   const addrs = Array.from(instrMemory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   for(const a of addrs){
@@ -430,16 +441,15 @@ function findNextInstructionFrom(start){
   return null;
 }
 
-// Play button
 playHeaderBtn.addEventListener('click', async ()=>{
   if(!running){
     running = true;
     playHeaderBtn.textContent = 'Pause';
-    logTask('Execution started.');
+    logTask('🚀 Execution started.');
     while(running){
       const nextAddr = findNextInstructionFrom(programCounter);
       if(nextAddr === null){
-        logTask('No more instructions to execute.');
+        logTask('✅ No more instructions to execute.');
         running = false;
         playHeaderBtn.textContent = 'Play';
         break;
@@ -449,15 +459,15 @@ playHeaderBtn.addEventListener('click', async ()=>{
   } else {
     running = false;
     playHeaderBtn.textContent = 'Play';
-    logTask('Execution paused.');
+    logTask('⏸️ Execution paused.');
   }
 });
 
-// Stop button: stop execution and reset PC & registers
 stopHeaderBtn.addEventListener('click', ()=>{
   running = false;
   playHeaderBtn.textContent = 'Play';
   programCounter = 0;
+  instructionCounter = 0;
   pcField.value = pad(0);
   r1.value = '0';
   r2.value = '0';
@@ -468,20 +478,20 @@ stopHeaderBtn.addEventListener('click', ()=>{
   accField.value = '';
   controlUnitLog.textContent = 'Waiting for instruction...';
   aluLog.textContent = 'Ready...';
-  logTask('Execution stopped. Registers reset.');
+  logTask('⏹️ Execution stopped. Registers reset.');
 });
 
-// Back button is in HTML (onclick)
-
-// Initialize: load defaults
 window.addEventListener('load', ()=> {
   resetMemory();
+  updateLines();
 });
 
 function updateLines() {
   const leftCard = document.querySelector('.instruction-panel');
   const cpuCard = document.querySelector('#cpuCard');
   const rightCard = document.querySelector('.memory-card-panel');
+
+  if(!leftCard || !cpuCard || !rightCard) return;
 
   const leftRect = leftCard.getBoundingClientRect();
   const cpuRect = cpuCard.getBoundingClientRect();
@@ -492,7 +502,8 @@ function updateLines() {
   const dataRed = document.getElementById('cpuToDataRed');
   const dataYellow = document.getElementById('cpuToDataYellow');
 
-  // Instruction Memory → CPU
+  if(!instrRed || !instrYellow || !dataRed || !dataYellow) return;
+
   let startX = leftRect.right;
   let endX = cpuRect.left;
   let width = endX - startX;
@@ -505,7 +516,6 @@ function updateLines() {
   instrYellow.style.width = `${width}px`;
   instrYellow.style.top = `${leftRect.top + leftRect.height / 3 + 20}px`;
 
-  // CPU → Data Memory
   startX = cpuRect.right;
   endX = rightRect.left;
   width = endX - startX;
@@ -519,17 +529,4 @@ function updateLines() {
   dataYellow.style.top = `${cpuRect.top + cpuRect.height / 3 + 20}px`;
 }
 
-// Call on load and resize
-window.addEventListener('load', updateLines);
-window.addEventListener('resize', updateLines);
-
-function addTaskLog(message) {
-  const taskRecord = document.getElementById("taskRecord");
-  const div = document.createElement("div");
-  div.className = "task-line";
-  div.textContent = message;
-  taskRecord.appendChild(div); // append at bottom
-
-  // Auto-scroll to bottom
-  taskRecord.scrollTop = taskRecord.scrollHeight;
-}
+window.addEventListener('resize', updateLines)
