@@ -283,6 +283,3 @@ Educational simulator for teaching Von Neumann architecture concepts. Colors and
 **Last Updated**: 2024  
 **Status**: Complete with full instruction execution and visual effects
 "# Simulation_C" 
-
-
-gazzin
