@@ -229,18 +229,37 @@ document.addEventListener('click', (e)=> {
 // load instructions to instruction memory
 loadInstructionBtn.addEventListener('click', ()=>{
   const text = instructionInput.value.trim();
-  if(!text) return;
+  if(!text) {
+    logTask('⚠️ No instructions to load. Please enter instructions first.');
+    return;
+  }
   const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
+  
+  // Clear existing instruction memory first
+  instrMemory.clear();
+  
   let addr = 0;
+  let loadedCount = 0;
   for(const l of lines){
     if(addr <= 6){
       instrMemory.set(addr, l);
       addr++;
+      loadedCount++;
     }
   }
+  
+  // Clear the textarea after loading
   instructionInput.value = '';
+  
+  // Re-render the instruction memory table
   renderInstructionMemory();
-  logTask('Loaded new instruction(s) to instruction memory.');
+  
+  // Reset program counter to start
+  programCounter = 0;
+  instructionCounter = 0;
+  pcField.value = pad(0);
+  
+  logTask(`✅ Loaded ${loadedCount} instruction(s) to instruction memory (addresses 0-${loadedCount-1}).`);
 });
 
 // clear instruction textarea
@@ -300,7 +319,10 @@ async function runCycleAt(addr){
   const ins = instrMemory.get(addr);
   instructionCounter++;
 
+  const cycleStartTime = performance.now();
+
   // FETCH
+  const fetchStart = performance.now();
   pcField.value = pad(addr);
   marField.value = pad(addr);
   controlUnitLog.textContent = 'Fetching instruction';
@@ -308,20 +330,24 @@ async function runCycleAt(addr){
   irField.value = '';
   glow(addrLine, TIM.fetch + 300);
   glow(cpuCard, TIM.fetch + 300);
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `${TIM.fetch}ms`]);
   await delay(TIM.fetch);
+  const fetchTime = (performance.now() - fetchStart).toFixed(2);
 
   // put into MDR and IR
   mdrField.value = ins;
   irField.value = ins;
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `⏱️ ${fetchTime}ms`]);
 
   // DECODE
+  const decodeStart = performance.now();
   controlUnitLog.textContent = 'Decoded instruction';
   glow(cpuCard, TIM.decode + 300);
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- DECODE ---', `Decoded: ${ins}`, `${TIM.decode}ms`]);
   await delay(TIM.decode);
+  const decodeTime = (performance.now() - decodeStart).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- DECODE ---', `Decoded: ${ins}`, `⏱️ ${decodeTime}ms`]);
 
   // EXECUTE
+  const executeStart = performance.now();
   controlUnitLog.textContent = 'Executing instruction';
   glow(dataLine, TIM.execute + 300);
   glow(cpuCard, TIM.execute + 300);
@@ -407,8 +433,9 @@ async function runCycleAt(addr){
   }
 
   aluLog.textContent = aluExpression || 'Executing...';
-  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `${TIM.execute}ms`]);
   await delay(TIM.execute);
+  const executeTime = (performance.now() - executeStart).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `⏱️ ${executeTime}ms`]);
 
   // advance program counter
   programCounter = addr + 1;
@@ -416,6 +443,9 @@ async function runCycleAt(addr){
   controlUnitLog.textContent = `Completed instruction ${pad(addr)}`;
 
   await delay(TIM.between);
+  
+  const totalCycleTime = (performance.now() - cycleStartTime).toFixed(2);
+  appendInstructionLog(`Instruction ${instructionCounter}:`, [`✅ Total cycle time: ${totalCycleTime}ms`, `---`]);
 }
 
 // find next instruction from start address
@@ -435,11 +465,11 @@ playHeaderBtn.addEventListener('click', async ()=>{
   if(!running){
     running = true;
     playHeaderBtn.textContent = 'Pause';
-    logTask('Execution started.');
+    logTask('🚀 Execution started.');
     while(running){
       const nextAddr = findNextInstructionFrom(programCounter);
       if(nextAddr === null){
-        logTask('No more instructions to execute.');
+        logTask('✅ No more instructions to execute.');
         running = false;
         playHeaderBtn.textContent = 'Play';
         break;
@@ -449,7 +479,7 @@ playHeaderBtn.addEventListener('click', async ()=>{
   } else {
     running = false;
     playHeaderBtn.textContent = 'Play';
-    logTask('Execution paused.');
+    logTask('⏸️ Execution paused.');
   }
 });
 
@@ -458,6 +488,7 @@ stopHeaderBtn.addEventListener('click', ()=>{
   running = false;
   playHeaderBtn.textContent = 'Play';
   programCounter = 0;
+  instructionCounter = 0;
   pcField.value = pad(0);
   r1.value = '0';
   r2.value = '0';
@@ -468,20 +499,21 @@ stopHeaderBtn.addEventListener('click', ()=>{
   accField.value = '';
   controlUnitLog.textContent = 'Waiting for instruction...';
   aluLog.textContent = 'Ready...';
-  logTask('Execution stopped. Registers reset.');
+  logTask('⏹️ Execution stopped. Registers reset.');
 });
-
-// Back button is in HTML (onclick)
 
 // Initialize: load defaults
 window.addEventListener('load', ()=> {
   resetMemory();
+  updateLines();
 });
 
 function updateLines() {
   const leftPanel = document.querySelector('.left-column');
   const cpuCard = document.querySelector('#cpuCard');
   const rightPanel = document.querySelector('.right-column');
+
+  if(!leftPanel || !cpuCard || !rightPanel) return;
 
   const leftRect = leftPanel.getBoundingClientRect();
   const cpuRect = cpuCard.getBoundingClientRect();
@@ -491,6 +523,8 @@ function updateLines() {
   const instrYellow = document.getElementById('instrToCpuYellow');
   const dataRed = document.getElementById('cpuToDataRed');
   const dataYellow = document.getElementById('cpuToDataYellow');
+
+  if(!instrRed || !instrYellow || !dataRed || !dataYellow) return;
 
   // Left to CPU
   let startX = leftRect.right;
@@ -519,8 +553,7 @@ function updateLines() {
   dataYellow.style.top = `${cpuRect.top + cpuRect.height / 3 + 20}px`;
 }
 
-// Call on load and resize
-window.addEventListener('load', updateLines);
+// Call on resize
 window.addEventListener('resize', updateLines);
 
 function addTaskLog(message) {
