@@ -1,4 +1,5 @@
 // von.js — Von Neumann simulation with unified soft-blue glow
+// SLOWEST - Single memory bottleneck (Von Neumann bottleneck)
 // Elements
 const infoBtn = document.getElementById('infoBtn');
 const infoModal = document.getElementById('infoModal');
@@ -48,12 +49,12 @@ const clearLogsBtn = document.getElementById('clearLogsBtn');
 // state
 const memory = new Map();
 let running = false;
-let instructionCounter = 0; // for task grouping
-let programCounter = 1; // starts at address 1
-let nextDataAddress = 1000; // data auto-assign start
+let instructionCounter = 0;
+let programCounter = 1;
+let nextDataAddress = 1000;
 
-// timings (ms)
-const TIM = { fetch: 900, decode: 700, execute: 900, store: 700, between: 250 };
+// timings (ms) - VON NEUMANN: SLOWEST due to memory bottleneck
+const TIM = { fetch: 1000, decode: 800, execute: 1000, store: 800, between: 300 };
 
 // default memory entries (instructions + numeric data)
 const DEFAULTS = [
@@ -74,7 +75,7 @@ function delay(ms){ return new Promise(res => setTimeout(res, ms)); }
 function pad(n){ return String(n).padStart(4,'0'); }
 function safe(v){ return v === undefined || v === null ? '' : String(v); }
 
-// DOM helpers for glow: adds .glow and removes after duration (fade out handled by CSS)
+// DOM helpers for glow
 function glow(el, duration = 1200){
   if(!el) return;
   el.classList.add('glow');
@@ -83,7 +84,6 @@ function glow(el, duration = 1200){
 
 // memory rendering
 function renderMemory(){
-  // sort numeric addresses ascending
   const addrs = Array.from(memory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   memoryBody.innerHTML = '';
   for(const a of addrs){
@@ -96,7 +96,6 @@ function renderMemory(){
     tdData.contentEditable = true;
     tdData.textContent = entry.data;
     tdData.classList.add(entry.source === 'instr' ? 'row-blue' : (entry.source === 'data' ? 'row-green':''));
-    // when user finishes edit, update memory
     tdData.addEventListener('blur', ()=> {
       memory.set(Number(a), { data: tdData.textContent.trim(), source: entry.source });
     });
@@ -123,7 +122,6 @@ function resetMemory(){
   for(const d of DEFAULTS){
     memory.set(Number(d.address), { data: String(d.data), source: Number(d.address) >= 1000 ? 'data' : 'instr' });
   }
-  // recompute nextDataAddress
   let maxData = Math.max(...Array.from(memory.keys()).filter(k=>k>=1000), 999);
   nextDataAddress = maxData + 1;
   renderMemory();
@@ -135,7 +133,6 @@ function nextInstructionAddress(){
   for(let i=1;i<1000;i++){
     if(!memory.has(i)) return i;
   }
-  // fallback
   let i = 1000;
   while(memory.has(i)) i++;
   return i;
@@ -145,14 +142,12 @@ function nextInstructionAddress(){
 function nextDataAddrAuto(){
   let a = nextDataAddress || 1000;
   while(memory.has(a)) a++;
-  // set nextDataAddress to one past the allocated address for subsequent calls
   nextDataAddress = a + 1;
   return a;
 }
 
 // task logging grouped by instruction
 function appendInstructionLog(groupTitle, lines){
-  // create group container
   const group = document.createElement('div');
   group.className = 'task-group';
   const h = document.createElement('h4');
@@ -164,9 +159,7 @@ function appendInstructionLog(groupTitle, lines){
     p.textContent = line;
     group.appendChild(p);
   }
-  // append at bottom (oldest top, newest bottom)
   taskRecordBox.appendChild(group);
-  // auto-scroll to bottom
   taskRecordBox.scrollTop = taskRecordBox.scrollHeight;
 }
 
@@ -175,7 +168,7 @@ clearLogsBtn.addEventListener('click', ()=> {
   taskRecordBox.innerHTML = '';
 });
 
-// info modal - small popup at top-right
+// info modal
 infoBtn.addEventListener('click', ()=> {
   infoModal.setAttribute('aria-hidden','false');
 });
@@ -183,7 +176,7 @@ infoClose?.addEventListener('click', ()=> {
   infoModal.setAttribute('aria-hidden','true');
 });
 
-// close modal when clicking outside of it
+// close modal when clicking outside
 document.addEventListener('click', (e)=> {
   if(infoModal.getAttribute('aria-hidden') === 'false' && 
      !infoModal.contains(e.target) && 
@@ -197,7 +190,7 @@ document.addEventListener('click', (e)=> {
   }
 });
 
-// help modal - same small popup style
+// help modal
 helpBtn.addEventListener('click', ()=> {
   helpModal.setAttribute('aria-hidden','false');
 });
@@ -205,7 +198,7 @@ helpClose?.addEventListener('click', ()=> {
   helpModal.setAttribute('aria-hidden','true');
 });
 
-// load instructions: append to next instruction addresses
+// load instructions
 loadInstructionBtn.addEventListener('click', ()=>{
   const text = instructionInput.value.trim();
   if(!text) {
@@ -224,7 +217,6 @@ loadInstructionBtn.addEventListener('click', ()=>{
   instructionInput.value = '';
   renderMemory();
   
-  // Reset program counter to start
   programCounter = 1;
   instructionCounter = 0;
   pcField.value = pad(1);
@@ -232,10 +224,8 @@ loadInstructionBtn.addEventListener('click', ()=>{
   logTask(`✅ Loaded ${loadedCount} instruction(s) to memory.`);
 });
 
-// clear instruction textarea
 clearInstructionBtn.addEventListener('click', ()=> instructionInput.value = '');
 
-// set direct data (auto address at >=1000)
 setDataBtn.addEventListener('click', ()=>{
   const v = dataValueInput.value.trim();
   if(!v) return;
@@ -246,15 +236,13 @@ setDataBtn.addEventListener('click', ()=>{
   logTask(`Direct memory set -> memory[${pad(addr)}] = ${v}`);
 });
 
-// clear data input
 clearDataBtn.addEventListener('click', ()=> dataValueInput.value = '');
 
-// reset memory button
 resetMemoryBtn.addEventListener('click', ()=> {
   resetMemory();
 });
 
-// simple logger for non-instruction messages
+// simple logger
 function logTask(msg){
   const now = new Date().toLocaleTimeString();
   const p = document.createElement('div');
@@ -264,22 +252,18 @@ function logTask(msg){
   taskRecordBox.scrollTop = taskRecordBox.scrollHeight;
 }
 
-// helper: resolve register or immediate (#) or memory address
 function resolveOperandToken(token){
   if(!token) return undefined;
   token = token.trim();
-  // register
   if(/^R[123]$/i.test(token)){
     const rv = document.getElementById(token.toLowerCase()).value;
     return Number.isNaN(Number(rv)) ? rv : Number(rv);
   }
-  // immediate literal like #5
   if(token.startsWith('#')){
     const lit = token.slice(1);
     const n = Number(lit);
     return Number.isNaN(n) ? lit : n;
   }
-  // memory address numeric
   if(/^\d+$/.test(token)){
     const n = Number(token);
     if(memory.has(n)) {
@@ -288,12 +272,10 @@ function resolveOperandToken(token){
     }
     return null;
   }
-  // plain number?
   if(!Number.isNaN(Number(token))) return Number(token);
   return token;
 }
 
-// main cycle: runs for one instruction at address addr
 async function runCycleAt(addr){
   if(!memory.has(addr)) {
     appendInstructionLog(`Instruction ${instructionCounter}:`, [`No instruction at address ${pad(addr)}`]);
@@ -312,13 +294,11 @@ async function runCycleAt(addr){
   controlUnitLog.textContent = 'Fetching instruction';
   mdrField.value = '';
   irField.value = '';
-  // visual: memory + address bus glow
   glow(addrLine, TIM.fetch + 300);
   glow(memoryCard, TIM.fetch + 300);
   await delay(TIM.fetch);
   const fetchTime = (performance.now() - fetchStart).toFixed(2);
 
-  // put into MDR and IR
   mdrField.value = ins;
   irField.value = ins;
   appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `⏱️ ${fetchTime}ms`]);
@@ -334,19 +314,16 @@ async function runCycleAt(addr){
 
   // EXECUTE
   const executeStart = performance.now();
-  // show ALU / CU and data bus glow for execute
   controlUnitLog.textContent = 'Executing instruction';
   glow(dataLine, TIM.execute + 300);
   glow(cpuCard, TIM.execute + 300);
 
-  // parse instruction: support MOV, ADD, SUB, MUL, DIV, LOAD, STORE
   const tokens = ins.split(/[\s,]+/).filter(Boolean);
   const op = tokens[0] ? tokens[0].toUpperCase() : '';
   let execDetails = '';
   let aluExpression = '';
   try {
     if(op === 'MOV'){
-      // MOV R1, #5   or MOV R1, 10
       const dest = tokens[1].toUpperCase();
       const src = tokens[2];
       const val = resolveOperandToken(src);
@@ -359,7 +336,6 @@ async function runCycleAt(addr){
         aluExpression = `Error: invalid ${dest}`;
       }
     } else if(['ADD','SUB','MUL','DIV'].includes(op)){
-      // ADD R3, R1, R2  (dest, op1, op2)
       const dest = tokens[1].toUpperCase();
       const aToken = tokens[2];
       const bToken = tokens[3];
@@ -381,7 +357,6 @@ async function runCycleAt(addr){
         aluExpression = `Error: invalid ${dest}`;
       }
     } else if(op === 'LOAD'){
-      // LOAD R1, 1000
       const dest = tokens[1].toUpperCase();
       const addrTok = tokens[2];
       const addrNum = Number(addrTok);
@@ -401,7 +376,6 @@ async function runCycleAt(addr){
         aluExpression = `Load error: address[${addrTok}] not found`;
       }
     } else if(op === 'STORE'){
-      // STORE R1, 1001
       const src = tokens[1].toUpperCase();
       const addrTok = tokens[2];
       const addrNum = Number(addrTok);
@@ -424,26 +398,22 @@ async function runCycleAt(addr){
     aluExpression = `Error: ${e.message || e}`;
   }
 
-  // Update ALU log with expression
   aluLog.textContent = aluExpression || 'Executing...';
 
   await delay(TIM.execute);
   const executeTime = (performance.now() - executeStart).toFixed(2);
   appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `⏱️ ${executeTime}ms`]);
 
-  // advance program counter (find next instruction address)
   programCounter = addr + 1;
   pcField.value = pad(programCounter);
   controlUnitLog.textContent = `Completed instruction ${pad(addr)}`;
 
-  // done for this instruction
   await delay(TIM.between);
   
   const totalCycleTime = (performance.now() - cycleStartTime).toFixed(2);
   appendInstructionLog(`Instruction ${instructionCounter}:`, [`✅ Total cycle time: ${totalCycleTime}ms`, `---`]);
 }
 
-// find next instruction (>= start)
 function findNextInstructionFrom(start){
   const addrs = Array.from(memory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   for(const a of addrs){
@@ -455,7 +425,6 @@ function findNextInstructionFrom(start){
   return null;
 }
 
-// play/pause handling (header control)
 playHeaderBtn.addEventListener('click', async ()=>{
   if(!running){
     running = true;
@@ -478,7 +447,6 @@ playHeaderBtn.addEventListener('click', async ()=>{
   }
 });
 
-// Stop button: stop execution and reset PC & registers (memory intact)
 stopHeaderBtn.addEventListener('click', ()=>{
   running = false;
   playHeaderBtn.textContent = 'Play';
@@ -492,7 +460,6 @@ stopHeaderBtn.addEventListener('click', ()=>{
   logTask('⏹️ Execution stopped and registers reset (memory preserved).');
 });
 
-// initialization
 (function init(){
   resetMemory();
   programCounter = 1;

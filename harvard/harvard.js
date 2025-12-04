@@ -1,4 +1,5 @@
 // harvard.js — Harvard Architecture simulation with separate instruction/data memory
+// MEDIUM SPEED - Pure Harvard (separate buses but older design)
 // Elements
 const infoBtn = document.getElementById('infoBtn');
 const infoModal = document.getElementById('infoModal');
@@ -50,8 +51,8 @@ let running = false;
 let instructionCounter = 0;
 let programCounter = 0;
 
-// timings (ms)
-const TIM = { fetch: 900, decode: 700, execute: 900, store: 700, between: 250 };
+// timings (ms) - HARVARD: MEDIUM speed (pure Harvard but older/simpler design)
+const TIM = { fetch: 850, decode: 700, execute: 900, store: 700, between: 250 };
 
 // default memory entries for Harvard
 const INSTR_DEFAULTS = [
@@ -96,7 +97,6 @@ function renderInstructionMemory(){
     const tdData = document.createElement('td');
     tdData.contentEditable = true;
     tdData.textContent = entry;
-    // when user finishes edit, update memory
     tdData.addEventListener('blur', ()=> {
       instrMemory.set(Number(a), tdData.textContent.trim());
     });
@@ -129,7 +129,6 @@ function renderDataMemory(){
     const tdData = document.createElement('td');
     tdData.contentEditable = true;
     tdData.textContent = entry;
-    // when user finishes edit, update memory
     tdData.addEventListener('blur', ()=> {
       dataMemory.set(Number(a), tdData.textContent.trim());
     });
@@ -235,26 +234,21 @@ loadInstructionBtn.addEventListener('click', ()=>{
   }
   const lines = text.split('\n').map(l=>l.trim()).filter(Boolean);
   
-  // Clear existing instruction memory first
   instrMemory.clear();
   
   let addr = 0;
   let loadedCount = 0;
   for(const l of lines){
-    if(addr <= 99){  // Allow addresses 0-99
+    if(addr <= 99){
       instrMemory.set(addr, l);
       addr++;
       loadedCount++;
     }
   }
   
-  // Clear the textarea after loading
   instructionInput.value = '';
-  
-  // Re-render the instruction memory table
   renderInstructionMemory();
   
-  // Reset program counter to start
   programCounter = 0;
   instructionCounter = 0;
   pcField.value = pad(0);
@@ -262,14 +256,11 @@ loadInstructionBtn.addEventListener('click', ()=>{
   logTask(`✅ Loaded ${loadedCount} instruction(s) to instruction memory (addresses 0-${loadedCount-1}).`);
 });
 
-// clear instruction textarea
 clearInstructionBtn.addEventListener('click', ()=> instructionInput.value = '');
 
-// set direct data (auto address at >=1000)
 setDataBtn.addEventListener('click', ()=>{
   const v = dataValueInput.value.trim();
   if(!v) return;
-  // find next available data address starting from 1000
   let addr = 1000;
   while(dataMemory.has(addr) && addr < 1010) addr++;
   dataMemory.set(addr, v);
@@ -278,25 +269,20 @@ setDataBtn.addEventListener('click', ()=>{
   logTask(`Direct memory set -> data memory[${pad(addr)}] = ${v}`);
 });
 
-// clear data input
 clearDataBtn.addEventListener('click', ()=> dataValueInput.value = '');
 
-// resolve operand token (register, immediate, address)
 function resolveOperandToken(token){
   if(!token) return undefined;
   token = token.trim();
-  // register
   if(/^R[123]$/i.test(token)){
     const rv = document.getElementById(token.toLowerCase()).value;
     return Number.isNaN(Number(rv)) ? rv : Number(rv);
   }
-  // immediate literal like #5
   if(token.startsWith('#')){
     const lit = token.slice(1);
     const n = Number(lit);
     return Number.isNaN(n) ? lit : n;
   }
-  // data memory address numeric (1000+)
   if(/^\d+$/.test(token)){
     const n = Number(token);
     if(dataMemory.has(n)) {
@@ -305,12 +291,10 @@ function resolveOperandToken(token){
     }
     return null;
   }
-  // plain number?
   if(!Number.isNaN(Number(token))) return Number(token);
   return token;
 }
 
-// main execution cycle for one instruction at address addr (in instruction memory)
 async function runCycleAt(addr){
   if(!instrMemory.has(addr)) {
     appendInstructionLog(`Instruction ${instructionCounter}:`, [`No instruction at address ${pad(addr)}`]);
@@ -333,7 +317,6 @@ async function runCycleAt(addr){
   await delay(TIM.fetch);
   const fetchTime = (performance.now() - fetchStart).toFixed(2);
 
-  // put into MDR and IR
   mdrField.value = ins;
   irField.value = ins;
   appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- FETCH ---', `Address: ${pad(addr)}`, `Fetching: ${ins}`, `⏱️ ${fetchTime}ms`]);
@@ -437,7 +420,6 @@ async function runCycleAt(addr){
   const executeTime = (performance.now() - executeStart).toFixed(2);
   appendInstructionLog(`Instruction ${instructionCounter}:`, ['--- EXECUTE ---', execDetails, `⏱️ ${executeTime}ms`]);
 
-  // advance program counter
   programCounter = addr + 1;
   pcField.value = pad(programCounter);
   controlUnitLog.textContent = `Completed instruction ${pad(addr)}`;
@@ -448,7 +430,6 @@ async function runCycleAt(addr){
   appendInstructionLog(`Instruction ${instructionCounter}:`, [`✅ Total cycle time: ${totalCycleTime}ms`, `---`]);
 }
 
-// find next instruction from start address
 function findNextInstructionFrom(start){
   const addrs = Array.from(instrMemory.keys()).map(n=>Number(n)).sort((a,b)=>a-b);
   for(const a of addrs){
@@ -460,7 +441,6 @@ function findNextInstructionFrom(start){
   return null;
 }
 
-// Play button
 playHeaderBtn.addEventListener('click', async ()=>{
   if(!running){
     running = true;
@@ -483,7 +463,6 @@ playHeaderBtn.addEventListener('click', async ()=>{
   }
 });
 
-// Stop button: stop execution and reset PC & registers
 stopHeaderBtn.addEventListener('click', ()=>{
   running = false;
   playHeaderBtn.textContent = 'Play';
@@ -502,7 +481,6 @@ stopHeaderBtn.addEventListener('click', ()=>{
   logTask('⏹️ Execution stopped. Registers reset.');
 });
 
-// Initialize: load defaults
 window.addEventListener('load', ()=> {
   resetMemory();
   updateLines();
@@ -526,7 +504,6 @@ function updateLines() {
 
   if(!instrRed || !instrYellow || !dataRed || !dataYellow) return;
 
-  // Instruction Memory → CPU
   let startX = leftRect.right;
   let endX = cpuRect.left;
   let width = endX - startX;
@@ -539,7 +516,6 @@ function updateLines() {
   instrYellow.style.width = `${width}px`;
   instrYellow.style.top = `${leftRect.top + leftRect.height / 3 + 20}px`;
 
-  // CPU → Data Memory
   startX = cpuRect.right;
   endX = rightRect.left;
   width = endX - startX;
@@ -553,5 +529,4 @@ function updateLines() {
   dataYellow.style.top = `${cpuRect.top + cpuRect.height / 3 + 20}px`;
 }
 
-// Call on resize
-window.addEventListener('resize', updateLines);
+window.addEventListener('resize', updateLines)
